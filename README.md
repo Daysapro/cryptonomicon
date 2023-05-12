@@ -1,6 +1,6 @@
 # Cryptonomicon
 
-[![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)[![views_tag](https://img.shields.io/github/watchers/Daysapro/cryptonomicon?label=Visitas&style=social)]()
+[![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
 ![crypto_tag](https://img.shields.io/:criptografía-2ecc71.svg?labelColor=F67F26&color=F67F26) ![ctf_tag](https://img.shields.io/:CTF-2ecc71.svg?labelColor=472D27&color=472D27)
 

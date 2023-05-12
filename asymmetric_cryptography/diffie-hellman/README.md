@@ -1,6 +1,6 @@
 # Diffie-Hellman
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-50%25-brightgreen)]()
+[![development_tag](https://img.shields.io/badge/en%20desarrollo-60%25-brightgreen)]()
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
@@ -30,6 +30,7 @@ Para poder entender este tema se recomienda al lector tener conocimientos básic
 4. [Criptoanálisis](#criptoanálisis)
     1. [Debilidades matemáticas](#debilidades-matemáticas)
         1. [Orden del grupo G y Pohlig-Hellman](#orden-del-grupo-g-y-pohlig-hellman)
+        2. [Propiedades del generador g](#propiedades-del-generador)
 
 
 ## Introducción
@@ -38,7 +39,7 @@ El sistema Diffie-Hellman es un protocolo criptográfico utilizado para el inter
 
 Esto se debe a que Diffie y Hellman crearon el concepto de clave pública y privada con el simple objetivo de que los dos interlocutores pudieran generar una clave compartida, que posteriormente sería usada en el sistema criptográfico simétrico en cuestión.
 
-En este intercambio de claves, un agente que podemos llamar Eva puede estar viendo lo que Alicia y Bob envían para consensuar la clave compartida, y aún así no ser capaz de obtenerla. Este fin se obtiene gracias al hecho de que resolver el problema del logaritmo discreto, bajo ciertas circunstancias, no es realizable en un tiempo menor a la edad del universo.
+En este intercambio de claves, un agente al que podemos llamar Eva, puede estar viendo lo que Alicia y Bob envían para consensuar la clave compartida, y aún así no ser capaz de obtenerla. Este fin se obtiene gracias al hecho de que resolver el problema del logaritmo discreto, bajo ciertas circunstancias, no es realizable en un tiempo menor a la edad del universo.
 
 
 ### Problema del logaritmo discreto
@@ -129,6 +130,9 @@ Para descifrar, el receptor utiliza el algoritmo de descifrado con la clave comp
 
 La seguridad de Diffie-Hellman está determinada por la dificultad de resolver el logaritmo discreto. Sin embargo, no solo poder resolverlo podría comprometer la seguridad, sino que también se debe comprobar que la comunicación no permite que terceros intercepten o manipulen el intercambio de claves. 
 
+
+### Debilidades matemáticas
+
 La elección adecuada de parámetros es crucial para la seguridad del intercambio de claves Diffie-Hellman. Uno de los parámetros más importantes es el tamaño del grupo $G$, que se define mediante el número primo $p$. Una mala elección podría permitir a un atacante calcular el logaritmo discreto.
 
 Además, también es importante seleccionar un tamaño lo suficientemente grande de claves $a$ y $b$ y elegir un generador válido $g$.
@@ -153,3 +157,26 @@ La teoría matemática del algoritmo Pohlig-Hellman abarca desde el [teorema de 
 En la realidad, para evitar este ataque se busca que $p$ sea lo que se denomina un [primo seguro](https://en.wikipedia.org/wiki/Safe_prime). Este caso particular de números primos sigue la estructura tal que $p = 2q + 1$ siendo $q$ también un número primo. $p$ pasa a llamarse primo seguro y $q$ primo de [Sophie Germain](https://en.wikipedia.org/wiki/Safe_and_Sophie_Germain_primes#Sophie_Germain_prime). Así nos aseguramos que el orden de $p$ solo es divisible por 2 y el resto es lo suficientemente grande para evitar el algoritmo Pohlig-Hellman.
 
 > [Ver caso práctico de Pohlig-Hellman.](scripts/pohlig-hellman.py)
+
+
+#### Propiedades del generador $g$
+
+El generador $g$ en el intercambio de claves Diffie-Hellman o raíz primitiva de $p$ es un valor entre $2$ y $p - 1$ que, elevado a sucesivas potencias, devuelve todos los elementos del grupo $G$ sin ciclos. Por ejemplo, si consideramos el grupo multiplicativo ${1, 2, 3, 4, 5, 6}$, el valor 3 es generador porque:
+
+$$3^1 = 3$$
+
+$$3^2 = 2$$
+
+$$3^3 = 6$$
+
+$$3^4 = 4$$
+
+$$3^5 = 5$$
+
+$$3^6 = 1$$
+
+Se han generado secuencialmente todos los elementos del grupo sin repetición.
+
+Aplicado al intercambio de claves, si $g$ no genera todos los elementos del grupo, los valores $A$ y $B$ que comparten Alicia y Bob para consensuar la clave $S$ no son cualquier valor del grupo $G$, sino que pertenecen a un nuevo subgrupo de $G$ generado por $g$. Si se estudia el logaritmo discreto en ese subgrupo se reduce la complejidad.
+
+Presentada la definición formal, cabe destacar que en la práctica raramente es así. El generador no tiene estrictamente que ser una raíz primitiva, pero si generar secuencialmente un grupo lo suficientemente grande para ser seguro. Las [recomendaciones actuales del instituto NIST](https://www.keylength.com/en/4/) marcan que para un grupo de 1024 bits, el tamaño de clave segura debería ser al menos 160 bits. De esta manera, si el subgrupo defininido tiene de más de $2^{160}$ elementos, se considera seguro.
