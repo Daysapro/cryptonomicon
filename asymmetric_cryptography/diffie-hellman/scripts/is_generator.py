@@ -1,4 +1,4 @@
-"""
+'''
 Calculadora de generadores del grupo multiplicativo de campos finitos de orden p.
 
 No es una buena implementación, pero sí muy didáctica.
@@ -22,7 +22,7 @@ Se han generado todos los elementos del grupo sin repetición. En el caso del 4:
 Se repite el 4 antes de generar el resto de elementos, por lo que 4 no sería generador del grupo.
 
 Autor: Daysapro.
-"""
+'''
 
 
 def is_generator(g, p):

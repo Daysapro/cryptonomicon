@@ -1,10 +1,10 @@
-"""
+'''
 Graficador de n valores de a**x = b mod m.
 
 Cambiar valores de a, m y n. Recomiendo probar a y m grandes.
 
 Autor: Daysapro.
-"""
+'''
 
 
 import matplotlib.pyplot as plt

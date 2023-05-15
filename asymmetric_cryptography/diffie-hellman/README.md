@@ -1,6 +1,6 @@
 # Diffie-Hellman
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-60%25-brightgreen)]()
+[![development_tag](https://img.shields.io/badge/en%20desarrollo-80%25-brightgreen)]()
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
@@ -30,7 +30,11 @@ Para poder entender este tema se recomienda al lector tener conocimientos básic
 4. [Criptoanálisis](#criptoanálisis)
     1. [Debilidades matemáticas](#debilidades-matemáticas)
         1. [Orden del grupo G y Pohlig-Hellman](#orden-del-grupo-g-y-pohlig-hellman)
-        2. [Propiedades del generador g](#propiedades-del-generador)
+        2. [Propiedades del generador g](#propiedades-del-generador-g)
+    2. [Man-in-the-Middle](#man-in-the-middle)
+        1. [Manipulación del parámetro $g$](#manipulación-del-parámetro-g)
+        2. [Manipulación de los parámetros $A$ y $B$](#manipulación-de-los-parámetros-a-y-b)
+        3. [Manipulación del parámetro $p$](#manipulación-del-primo-p)
 
 
 ## Introducción
@@ -46,17 +50,13 @@ En este intercambio de claves, un agente al que podemos llamar Eva, puede estar 
 
 El problema del logaritmo discreto es un problema matemático que se refiere a encontrar un número entero positivo $x$ que satisfaga la ecuación:
 
-$$\begin{aligned} 
-a^x \equiv b \bmod m 
-\end{aligned}$$
+$$a^x \equiv b \bmod m$$
 
 donde $a$, $b$ y $m$ son números enteros positivos conocidos. 
 
 Si despejamos $x$, resultaría en que:
 
-$$\begin{aligned} 
-x \equiv \log{_a}{b} \bmod m
-\end{aligned}$$
+$$x \equiv \log{_a}{b} \bmod m$$
 
 Podríamos pensar que puede ser sencillo: vamos tomando valores de $x$ y usando fuerza bruta llegará un momento que encontremos una que cumpla la ecuación. Para valores pequeños sí, podríamos hacerlo, pero en Diffie-Hellman actualmente se utilizan valores de 2048 bits, convirtiendo el problema en irrealizable.
 
@@ -64,9 +64,7 @@ De hecho, en la actualidad no se conoce ningún algoritmo determinista que pueda
 
 Sin entrar en el porqué de que no exista ningún algoritmo determinista para resolver este problema, se puede presentar un ejemplo gráfico que ayuda al entendimiento. Imaginemos unos valores definidos de $a$ y $m$:
 
-$$\begin{aligned} 
-b \equiv 100^x \bmod 191 
-\end{aligned}$$
+$$b \equiv 100^x \bmod 191$$
 
 <p align="center">
     <img width="40%" src="images/discrete_logarithm.png"> 
@@ -114,7 +112,7 @@ Veámoslo en números:
 
 Siendo el primo elegido pequeño, como en el ejemplo dado con $p = 37$, sería tarea trivial realizar un ataque de fuerza bruta para resolver el logaritmo discreto. En este caso, se tendrían que probar todos los $a$ y $b$ desde $1$ hasta $p - 1$ hasta encontrar los valores que cumplan la congruencia. Este ataque no es realizable con $a$ y $b$ más grandes.
 
-> [Ver implementación de la generación de claves.](scripts/diffie-hellman.py)
+> [Ver implementación de la generación de claves.](scripts/diffie_hellman.py)
 
 
 ## Cifrando con la clave compartida
@@ -156,7 +154,7 @@ La teoría matemática del algoritmo Pohlig-Hellman abarca desde el [teorema de 
 
 En la realidad, para evitar este ataque se busca que $p$ sea lo que se denomina un [primo seguro](https://en.wikipedia.org/wiki/Safe_prime). Este caso particular de números primos sigue la estructura tal que $p = 2q + 1$ siendo $q$ también un número primo. $p$ pasa a llamarse primo seguro y $q$ primo de [Sophie Germain](https://en.wikipedia.org/wiki/Safe_and_Sophie_Germain_primes#Sophie_Germain_prime). Así nos aseguramos que el orden de $p$ solo es divisible por 2 y el resto es lo suficientemente grande para evitar el algoritmo Pohlig-Hellman.
 
-> [Ver caso práctico de Pohlig-Hellman.](scripts/pohlig-hellman.py)
+> [Ver caso práctico de Pohlig-Hellman.](scripts/pohlig_hellman.py)
 
 
 #### Propiedades del generador $g$
@@ -179,4 +177,92 @@ Se han generado secuencialmente todos los elementos del grupo sin repetición.
 
 Aplicado al intercambio de claves, si $g$ no genera todos los elementos del grupo, los valores $A$ y $B$ que comparten Alicia y Bob para consensuar la clave $S$ no son cualquier valor del grupo $G$, sino que pertenecen a un nuevo subgrupo de $G$ generado por $g$. Si se estudia el logaritmo discreto en ese subgrupo se reduce la complejidad.
 
-Presentada la definición formal, cabe destacar que en la práctica raramente es así. El generador no tiene estrictamente que ser una raíz primitiva, pero si generar secuencialmente un grupo lo suficientemente grande para ser seguro. Las [recomendaciones actuales del instituto NIST](https://www.keylength.com/en/4/) marcan que para un grupo de 1024 bits, el tamaño de clave segura debería ser al menos 160 bits. De esta manera, si el subgrupo defininido tiene de más de $2^{160}$ elementos, se considera seguro.
+Presentada la definición formal, cabe destacar que en la práctica raramente es así. El generador no tiene estrictamente que ser una raíz primitiva, pero si generar secuencialmente un grupo lo suficientemente grande para ser seguro. Las [recomendaciones actuales del instituto NIST](https://www.keylength.com/en/4/) marcan que para un grupo de 1024 bits, el tamaño de clave segura debería ser al menos 160 bits. De esta manera, si el subgrupo definido tiene de más de $2^{160}$ elementos, se considera seguro.
+
+
+### Man-in-the-Middle
+
+La manipulación de un tercero en el intercambio de claves Diffie-Hellman tiraría por tierra todos los esfuerzos de usar parámetros seguros en el problema del logaritmo discreto.
+
+El ataque [Man-in-the-Middle](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (MITM) es una técnica utilizada por un atacante para interceptar y manipular la comunicación entre dos partes.
+
+En el intercambio de claves Diffie-Hellman, este atacante podría recibir de Alicia $g$, $p$ y $A$, retener esa información, modificarla a su conveniencia, y enviar los parámetros modificados a Bob. Este es el caso base sobre el que se va a construir los siguientes apartados. Nuestro atacante Eva recibirá los parámetros enviados por Alicia y Bob y los manipulará para tratar de recuperar las claves privadas.
+
+<p align="center">
+    <img width="50%" src="images/mitm.png"> 
+</p>
+
+
+#### Manipulación del parámetro $g$
+
+En este apartado se van a analizar distintos escenarios en los que se manipula el valor del generador, junto con sus respectivas explotaciones. En estos ataques se cambiará el valor de $g$ original por uno malicioso $g'$ mientras que $p$, $A$ y $B$ se mantendrán igual.
+
+
+##### $g = 1$
+
+Si Eva introduce $g = 1$, Bob calcula $B \equiv 1^b \bmod p \equiv 1$. 
+La clave compartida para Alicia será $S \equiv 1^a \bmod p \equiv 1$. 
+
+> [Ver caso práctico g = 1.](scripts/generator_1.py)
+
+
+##### $g = p$
+
+Si Eva introduce $g = p$, Bob calcula $B \equiv p^b \bmod p \equiv 0$.
+La clave compartida para Alicia será $S \equiv 0^a \bmod p \equiv 0$.
+En el caso $g = 0$ el resultado es el mismo.
+
+> [Ver caso práctico g = p.](scripts/generator_p.py)
+
+
+##### $g = p - 1$
+
+Si Eva introduce $g = p - 1$, Bob calcula $B \equiv {(p - 1)}^b \bmod p$.
+
+Probando distintos valores de $b$ se observa en pocas iteraciones que $B$ vale $1$ o $p - 1$. Específicamente vale $1$ cuando $b$ es par y $p - 1$ cuando es impar. Se puede demostrar con el siguiente razonamiento.
+
+$$B \equiv (p-1)^b \pmod{p}$$
+
+* Si $b$ es par, podemos escribir $(p-1)^b$ como $(p-1)^{2k}$ para un $k$ entero no negativo. 
+
+$$(p-1)^{2k} = ((p-1)^2)^k = (p^2 - 2p + 1)^k \equiv (0 + 0 + 1)^k \bmod p \equiv 1$$
+
+* Si $b$ es impar, podemos escribir $(p-1)^b$ como $(p-1)^{2k + 1}$ para un $k$ entero no negativo. 
+
+$$(p-1)^{2k + 1} = (p-1)^{2k} \cdot (p-1) \equiv 1 \cdot (p - 1) \bmod p \equiv p - 1$$
+
+La clave compartida para Alicia será $S \equiv 1^a \bmod p \equiv 1$ o $S \equiv {(p - 1)}^a \bmod p \equiv 1 | (p - 1)$. Cualquier mensaje de Alicia podrá ser leído con alguna de las dos claves posibles.
+
+> [Ver caso práctico g = p - 1.](scripts/generator_p_1.py)
+
+
+##### $g = A$
+
+Si Eva introduce $g = A$, Bob calcula $B \equiv A^b \bmod p$.
+Eva intercepta $B$, siendo $B \equiv A^b \bmod p \equiv g^{ab} \bmod p \equiv S$.
+
+Este ataque se presenta en muy pocas situaciones, ya que Eva debe enviar una $B$ a Alicia de vuelta que sea equivalente a $g^b \bmod p$ y no a $A^b \bmod p$. Para lograr esto, Eva tendría que haber obtenido previamente el valor original de $B$. Esto sería posible si Bob no cambia su clave $b$ después de cada intercambio, práctica que es poco segura. Si fuese el caso, Eva tendría que observar dos intercambios de clave, guardaría el valor de $B$ en el primero sin intervenir mientras que en el segundo realizaría el ataque explicado. Eva podría leer mensajes tanto de Alicia como de Bob.
+
+> [Ver caso práctico g = A.](scripts/generator_A.py)
+
+Cabe señalar que, exceptuando el último caso, solo podríamos leer mensajes de Alicia porque la clave consensuada maliciosa solo la tendría ella.
+
+
+#### Manipulación de los parámetros $A$ y $B$
+
+En los parámetros $A$ y $B$ se pueden implementar los mismos ataques que en $g$.
+
+$$A = 1 \rightarrow S \equiv 1^b \bmod p \equiv 1$$
+
+$$A = p \rightarrow S \equiv p^b \bmod p \equiv 0$$
+
+$$A = p - 1 \rightarrow S \equiv (p - 1)^b \bmod p \equiv 1 | (p - 1)$$
+
+De la misma forma, se podrían indicar los mismos valores $B$ a Alicia y todos los mensajes serían legibles.
+
+
+#### Manipulación del primo $p$
+
+El primo $p$ es el encargado de asegurar el logaritmo discreto. Un atacante podría introducir un primo no demasiado grande para poder hacer fuerza bruta y calcular la clave compartida. Si el sistema solo comprobara el tamaño del número, se podría generar un primo vulnerable al ataque Pohlig-Hellman, como está descrito en el apartado de [orden del grupo y Pohlig-Hellman](#orden-del-grupo-y-pohlig-hellman).
+
+Todos los casos anteriores se reservan para el estudio teórico del sistema, no son ataques aplicables a la realidad. Actualmente, los protocolos que utilizan Diffie-Hellman comprueban cuidadosamente los parámetros antes de compartirlos con cualquier otra parte del intercambio. Además, usan claves de un solo uso y estrategias para evitar la manipulación de un tercero.
