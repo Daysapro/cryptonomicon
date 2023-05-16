@@ -1,6 +1,6 @@
 # Diffie-Hellman
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-80%25-brightgreen)]()
+[![development_tag](https://img.shields.io/badge/en%20desarrollo-90%25-brightgreen)]()
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
@@ -32,9 +32,12 @@ Para poder entender este tema se recomienda al lector tener conocimientos básic
         1. [Orden del grupo G y Pohlig-Hellman](#orden-del-grupo-g-y-pohlig-hellman)
         2. [Propiedades del generador g](#propiedades-del-generador-g)
     2. [Man-in-the-Middle](#man-in-the-middle)
-        1. [Manipulación del parámetro $g$](#manipulación-del-parámetro-g)
-        2. [Manipulación de los parámetros $A$ y $B$](#manipulación-de-los-parámetros-a-y-b)
-        3. [Manipulación del parámetro $p$](#manipulación-del-primo-p)
+        1. [Manipulación del parámetro g](#manipulación-del-parámetro-g)
+        2. [Manipulación de los parámetros A y B](#manipulación-de-los-parámetros-a-y-b)
+        3. [Manipulación del parámetro p](#manipulación-del-primo-p)
+    3. [Sucesores](#sucesores)
+        1. [ElGamal](#elgamal)
+        2. [Curvas elípticas](#curvas-elípticas)
 
 
 ## Introducción
@@ -74,7 +77,7 @@ La figura anterior representa los valores de $b$ para $x$ de $1$ a $100$. La rel
 
 > [Ver graficador del logaritmo discreto.](scripts/dlog_graphicator.py)
 
-Utilizando un lenguaje algebraico, se denomina logaritmo discreto de $b$ en base $a$ a la solución $x$ de la ecuación $a^x = b$ donde $a$ y $b$ son elementos de un grupo cíclico finito $G$ módulo $m$. Se recuperará esta definición formal más adelante en la sección de [generación de claves](#generación-de-claves).
+Utilizando un lenguaje algebraico, se denomina logaritmo discreto de $b$ en base $a$ a la solución $x$ de la ecuación $a^x = b$ donde $a$ y $b$ son elementos de un grupo cíclico finito $G$ módulo $m$. Se recuperará esta definición formal más adelante en la sección de [generación de claves](#generación-de-la-clave-compartida).
 
 
 ### Problema del intercambio de claves en un canal inseguro
@@ -186,7 +189,7 @@ La manipulación de un tercero en el intercambio de claves Diffie-Hellman tirar�
 
 El ataque [Man-in-the-Middle](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (MITM) es una técnica utilizada por un atacante para interceptar y manipular la comunicación entre dos partes.
 
-En el intercambio de claves Diffie-Hellman, este atacante podría recibir de Alicia $g$, $p$ y $A$, retener esa información, modificarla a su conveniencia, y enviar los parámetros modificados a Bob. Este es el caso base sobre el que se va a construir los siguientes apartados. Nuestro atacante Eva recibirá los parámetros enviados por Alicia y Bob y los manipulará para tratar de recuperar las claves privadas.
+En el intercambio de claves Diffie-Hellman, este atacante podría recibir de Alicia $g$, $p$ y $A$, retener esa información, modificarla a su conveniencia, y enviar los parámetros modificados a Bob. Este es el caso base sobre el que se va a construir los siguientes problemas. Nuestro atacante Eva recibirá los parámetros enviados por Alicia y Bob y los manipulará para tratar de recuperar las claves privadas.
 
 <p align="center">
     <img width="50%" src="images/mitm.png"> 
@@ -195,7 +198,7 @@ En el intercambio de claves Diffie-Hellman, este atacante podría recibir de Ali
 
 #### Manipulación del parámetro $g$
 
-En este apartado se van a analizar distintos escenarios en los que se manipula el valor del generador, junto con sus respectivas explotaciones. En estos ataques se cambiará el valor de $g$ original por uno malicioso $g'$ mientras que $p$, $A$ y $B$ se mantendrán igual.
+En esta sección se van a analizar distintos escenarios en los que se manipula el valor del generador, junto con sus respectivas explotaciones. En estos ataques se cambiará el valor de $g$ original por uno malicioso $g'$ mientras que $p$, $A$ y $B$ se mantendrán igual.
 
 
 ##### $g = 1$
@@ -263,6 +266,31 @@ De la misma forma, se podrían indicar los mismos valores $B$ a Alicia y todos l
 
 #### Manipulación del primo $p$
 
-El primo $p$ es el encargado de asegurar el logaritmo discreto. Un atacante podría introducir un primo no demasiado grande para poder hacer fuerza bruta y calcular la clave compartida. Si el sistema solo comprobara el tamaño del número, se podría generar un primo vulnerable al ataque Pohlig-Hellman, como está descrito en el apartado de [orden del grupo y Pohlig-Hellman](#orden-del-grupo-y-pohlig-hellman).
+El primo $p$ es el encargado de asegurar el logaritmo discreto. Un atacante podría introducir un primo no demasiado grande para poder hacer fuerza bruta y calcular la clave compartida. Si el sistema solo comprobara el tamaño del número, se podría generar un primo vulnerable al ataque Pohlig-Hellman, como está descrito en la sección de [orden del grupo y Pohlig-Hellman](#orden-del-grupo-y-pohlig-hellman).
 
 Todos los casos anteriores se reservan para el estudio teórico del sistema, no son ataques aplicables a la realidad. Actualmente, los protocolos que utilizan Diffie-Hellman comprueban cuidadosamente los parámetros antes de compartirlos con cualquier otra parte del intercambio. Además, usan claves de un solo uso y estrategias para evitar la manipulación de un tercero.
+
+
+## Sucesores
+
+El sistema de intercambio de claves Diffie-Hellman fue el primer contacto con la criptografía asimétrica y marcó precedentes en el campo de los protocolos criptográficos. En esta sección se explican brevemente distintas variaciones e implementaciones muy relacionadas con este.
+
+
+### ElGamal
+
+[ElGamal](https://en.wikipedia.org/wiki/ElGamal_encryption) es un protocolo criptográfico de clave pública propuesto por [Taher ElGamal](https://en.wikipedia.org/wiki/Taher_Elgamal) en 1985. Se basa en el problema del logaritmo discreto en un grupo cíclico finito, al igual que Diffie-Hellman. A diferencia de este, no requiere del uso de otro cifrado simétrico para encriptar mensajes, sino que utiliza una serie de operaciones matemáticas relacionadas con el problema mencionado para asegurar la privacidad de la comunicación. 
+
+
+### Curvas elípticas
+
+En la década de 1990, se comenzó a explorar la aplicación de [curvas elípticas en la criptografía](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography). 
+
+Una curva elíptica es una figura geométrica definida por la ecuación:
+
+$$ y^2 = x^3 + ax + b$$
+
+Estas estructuras matemáticas complejas se utilizan en combinación con algunos sistemas criptográficos como Diffie-Hellman o [DSA](https://en.wikipedia.org/wiki/Digital_Signature_Algorithm) para mejorar la seguridad. 
+
+El caso de uso específico de Diffie-Hellman ([ECDH](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman)) supone sustituir el grupo cíclico finito definido por $p$ por el grupo definido por una curva elíptica. Las operaciones dentro de este nuevo grupo requieren menos recursos computacionales y el logaritmo discreto se convierte en un problema más complejo aún.
+
+Este tema se tratará más adelante en un futuro apartado dedicado únicamente a las curvas elípticas.
