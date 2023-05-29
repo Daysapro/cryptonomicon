@@ -2,7 +2,7 @@
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
-![crypto_tag](https://img.shields.io/:criptografía-2ecc71.svg?labelColor=F67F26&color=F67F26) ![ctf_tag](https://img.shields.io/:CTF-2ecc71.svg?labelColor=472D27&color=472D27)
+[![crypto_tag](https://img.shields.io/:criptografía-2ecc71.svg?labelColor=F67F26&color=F67F26)]() [![ctf_tag](https://img.shields.io/:CTF-2ecc71.svg?labelColor=472D27&color=472D27)]()
 
 
 > Criptografía en español.
@@ -13,8 +13,11 @@ Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de
 
 
 ## Contenidos
-- **Criptografía asimétrica**
-    * [Diffie-Hellman](/asymmetric_cryptography/diffie-hellman/README.md)
+- **Teoría**
+    - **Criptografía asimétrica**
+        - [Diffie-Hellman](/asymmetric/diffie-hellman/README.md)
+- **Soluciones competiciones CTF**
+    - [TJCTF 2023](/writeups/TJCTF_2023/README.md)
 
 
 ## ¡Sígueme!
