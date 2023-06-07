@@ -2,11 +2,11 @@
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
-[![ctf_tag](https://img.shields.io/:CTF-2ecc71.svg?labelColor=472D27&color=472D27)]() [![public_key_tag](https://img.shields.io/:clave%20pública-2ecc71.svg?labelColor=FF0000&color=FF0000)]() [![algebra_tag](https://img.shields.io/:álgebra-2ecc71.svg?labelColor=149AFF&color=149AFF)]()
+[![ctf_tag](https://img.shields.io/:CTF-2ecc71.svg?labelColor=472D27&color=472D27)]() [![public_key_tag](https://img.shields.io/:clave%20pública-2ecc71.svg?labelColor=FF0000&color=FF0000)]() [![modular_arithmetic_tag](https://img.shields.io/:artimética%20modular-2ecc71.svg?labelColor=149AFF&color=149AFF)]() [![algebra_tag](https://img.shields.io/:álgebra-2ecc71.svg?labelColor=149AFF&color=149AFF)]()
 
 > **26/05/2023 2:00 CEST - 28/05/2023 2:00 CEST** 
 
-Se explican los cinco primeros ejercicios de la sección de criptografía.
+Se explican los cinco ejercicios más resueltos de la sección de criptografía.
 
 Todo el código desarrollado se puede consultar en la carpeta de scripts. Se pueden ejecutar mientras los servidores de TJCTF 2023 sigan online.
 
@@ -299,9 +299,9 @@ while True:
 
 ### Resolución
 
-Este ejercicio es un sistema de inicio de sesión en el que se introduce el nombre de usuario y su firma RSA asociada. El objetivo es acceder como el usuario "admin" para obtener la flag.
+Este ejercicio es un sistema de inicio de sesión en el que se introduce el nombre de usuario y su firma RSA asociada. El objetivo es acceder como el usuario ```admin``` para obtener la flag.
 
-Siendo $m$ el valor numérico de "admin", la firma se calcula como: 
+Siendo $m$ el valor numérico de ```admin```, la firma se calcula como: 
 
 $$s \equiv m^d \bmod n$$
 
@@ -310,9 +310,9 @@ Con $n$ y $m$ conocidos.
 En esta situación, se puede manipular las peticiones para hacer un ataque del mensaje elegido en la firma RSA.
 
 1. Se selecciona un $m_1$ aleatorio.
-2. Se obtiene la firma de $m_1$ con el "new": $s_1$.
-3. Se calcula un $m_2 = m \cdot m_1^{-1}$, siendo $m$ el valor numérico de "admin" y $m_1^{-1}$ el inverso modular de $m_1$ en $n$.
-4. Se obtiene la firma de $m_2$ con el "new": $s_2$.
+2. Se obtiene la firma de $m_1$ con el ```new```: $s_1$.
+3. Se calcula un $m_2 = m \cdot m_1^{-1}$, siendo $m$ el valor numérico de ```admin``` y $m_1^{-1}$ el inverso modular de $m_1$ en $n$.
+4. Se obtiene la firma de $m_2$ con el ```new```: $s_2$.
 5. Se calcula $s$ como:
 
 $$ s_1 \equiv m_1^d \bmod n$$
@@ -408,7 +408,7 @@ print("e: ", e)
 
 En este desafío CTF, se utiliza un sistema RSA y con valores visualmente no vulnerables. Tenemos un valor de $n$ no factorizable en un tiempo razonable, $e = 5$ y el texto cifrado $c$ que queremos descifrar.
 
-El mensaje $m$ que se encripta es la concatenación del mensaje "the challenges flag is " con la flag. Esto nos recuerda a un [ataque Coppersmith](https://en.wikipedia.org/wiki/Coppersmith%27s_attack).
+El mensaje $m$ que se encripta es la concatenación del mensaje ```the challenges flag is ``` con la flag. Esto nos recuerda a un [ataque Coppersmith](https://en.wikipedia.org/wiki/Coppersmith%27s_attack).
 
 El método de Coppersmith es un algoritmo utilizado para resolver ecuaciones modulares polinómicas y es muy efectivo en ataques a RSA cuando se conoce una parte del texto claro o de la clave privada.
 
@@ -426,7 +426,7 @@ $$ f(x) = (M + x)^e - c$$
 
 Siendo $M$ el mensaje conocido y $x$ la flag.
 
-Para que el polinomio desarrollado represente completamente nuestro problema, debemos agregar un desplazamiento a la flag. El mensaje en claro no es lo conocido más la flag, sino que están concatenados. La concatenación puede llegar a ser un desafío por la función "bytes_to_long", por lo que primero pensemos en decimal:
+Para que el polinomio desarrollado represente completamente nuestro problema, debemos agregar un desplazamiento a la flag. El mensaje en claro no es lo conocido más la flag, sino que están concatenados. La concatenación puede llegar a ser un desafío por la función ```bytes_to_long```, por lo que primero pensemos en decimal:
 
 $$50050555 = 50000555 + 5 \cdot (10^5)$$
 
@@ -446,7 +446,7 @@ La longitud de la flag $len$ representa ese desplazamiento del mensaje conocido 
 
 Coppersmith demostró que, teniendo este [polinomio mónico](https://es.wikipedia.org/wiki/Polinomio_m%C3%B3nico) establecido, se pueden encontrar los enteros $x_0$ calculando las raíces de $f$.
 
-Después de realizar las primeras pruebas no se encuentran raíces para el mensaje conocido. Poniéndole atención a la estructura del mensaje conocido, se puede suponer que  continua con el formato de flag de la competición "tjctf{". Añadiendo esa cadena se obtiene una raíz.
+Después de realizar las primeras pruebas no se encuentran raíces para el mensaje conocido. Poniéndole atención a la estructura del mensaje conocido, se puede suponer que  continua con el formato de flag de la competición ```tjctf{```. Añadiendo esa cadena se obtiene una raíz.
 
 Para la implementación se utiliza [sagemath](https://www.sagemath.org/).
 

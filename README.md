@@ -17,6 +17,7 @@ Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de
     - **Criptografía asimétrica**
         - [Diffie-Hellman](/asymmetric/diffie-hellman/README.md)
 - **Soluciones competiciones CTF**
+    - [Break the Syntax CTF 2023](/writeups/Break_the_Syntax_CTF_2023/README.md)
     - [TJCTF 2023](/writeups/TJCTF_2023/README.md)
 
 
