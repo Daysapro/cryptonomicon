@@ -6,7 +6,8 @@
 
 > **26/05/2023 2:00 CEST - 28/05/2023 2:00 CEST** 
 
-Todo el código desarrollado se puede consultar en la carpeta de scripts. Se pueden ejecutar mientras los servidores de TJCTF 2023 sigan online.
+Todo el código desarrollado se puede consultar en la carpeta de scripts.
+
 
 ## baby-rsa
 
