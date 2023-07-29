@@ -11,7 +11,10 @@ Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de
 
 
 ## Contenidos
+
 - **Teoría**
+    - **Criptografía simétrica**
+        - [Modos de operación de cifrado de bloques](/symmetric/block_cipher_modes/README.md)
     - **Criptografía asimétrica**
         - [Diffie-Hellman](/asymmetric/diffie-hellman/README.md)
 - **Soluciones competiciones CTF**
@@ -22,5 +25,6 @@ Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de
 
 
 ## ¡Sígueme!
+
 - [LinkedIn](https://www.linkedin.com/in/david-ram%C3%ADrez-acero-3bb282266/)
 - [Twitter](https://twitter.com/daysapro)
