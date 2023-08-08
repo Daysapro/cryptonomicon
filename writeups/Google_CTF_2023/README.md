@@ -159,11 +159,11 @@ Fichero cifrado.
 
 La secuencia de valores se calcula según:
 
-$$X_{n + 1} = (m \cdot X_n + c) \bmod n$$
+$$X_{n + 1} \equiv (m \cdot X_n + c) \bmod n$$
 
 Donde $X_0$ es el valor inicial o semilla.
 
-En este ejercicio, se conoce la semilla y los primeros seis valores generados. El sistema continúa generando valores aleatorios a partir de los dados, verifica si son primos y si tienen una longitud en bits determinada para, si cumplen las condiciones, calcular un módulo $n$ para cifrar en RSA. Este módulo $n$ está compuesto por el producto de ocho números primos de 512 bits, lo cual hacer imposible su factorización en un tiempo razonable.
+En este ejercicio, se conoce la semilla y los primeros seis valores generados. El sistema continúa generando valores aleatorios a partir de los dados, verifica si son primos y si tienen una longitud en bits determinada para, si cumplen las condiciones, calcular un módulo $n$ para cifrar en RSA. Este módulo $n$ está compuesto por el producto de ocho números primos de 512 bits, lo cual hace imposible su factorización en un tiempo razonable.
 
 El código proporcionado no requiere de muchos recursos computacionales para ser ejecutado. Es decir, si se recuperan los parámetros $m$, $c$ y $n$ del generador de números aleatorios, se podría ejecutar la búsqueda de los primos sin problemas. 
 

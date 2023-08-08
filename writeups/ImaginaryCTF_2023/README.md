@@ -222,7 +222,7 @@ Todo ello sin conocer la clave privada $d$ pero con acceso al sistema de firma.
 
 #### CRC32 hace más difícil las cosas
 
-En el caso del ejercicio que nos ocupa no es tan sencillo. Esos valores de $m$ que podemos introducir en el sistema de firma no son simplemente valores numéricos, sino el código que son los códigos de redundancia cíclica de los mismos. Sin embargo, a pesar de que el autor nos indica lo contrario en un comentario en el código, CRC32 tiene colisiones. 
+En el caso del ejercicio que nos ocupa no es tan sencillo. Esos valores de $m$ que podemos introducir en el sistema de firma no son simplemente valores numéricos, sino los códigos de redundancia cíclica de los mismos. Sin embargo, a pesar de que el autor nos indica lo contrario en un comentario en el código, CRC32 tiene colisiones. 
 
 El procedimiento de ataque es el siguiente:
 

@@ -1,6 +1,6 @@
 # Modos de operación de cifrado de bloques
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-50%25-brightgreen)]()
+[![development_tag](https://img.shields.io/badge/en%20desarrollo-60%25-brightgreen)]()
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
@@ -29,6 +29,8 @@ Para comprender los modos de operación de cifrados de bloques, se recomienda te
     1. [ECB (Electronic codebook)](#ecb-electronic-codebook)
         1. [Esquema](#esquema)
         2. [Ecuaciones](#ecuaciones)
+        3. [Criptoanálisis](#criptoanálisis)
+            1. [Byte-at-a-time](#byte-at-a-time)
     2. [CBC (Cipher block chaining)](#cbc-cipher-block-chaining)
         1. [Esquema](#esquema-1)
         2. [Ecuaciones](#ecuaciones-1)
@@ -120,6 +122,54 @@ ECB es el método más simple de organizar los bloques en los modos de operació
 $$C_i = E_K(P_i)$$
 
 $$P_i = D_K(P_i)$$
+
+
+#### Criptoanálisis
+
+Se considera que el problema del modo ECB recae en la falta de difusión del caos. Un bloque de texto claro siempre producirá exactamente el mismo texto cifrado cuando se usa la misma clave. Por tanto, dentro de un mismo proceso de cifrado con un número considerable de bloques, este modo no será capaz de ocultar posibles patrones de datos. Este problema se puede representar cifrando los píxeles en bruto de una imagen utilizando un cifrado simétrico y el modo ECB.
+
+<div align="center">
+    <img width="40%" src="images/daysapro.png">
+    <img width="40%" src="images/aes_ecb_daysapro.png">
+</div>
+
+A la derecha, aún habiendo cifrado con AES utilizando ECB, se sigue leyendo la palabra sin problema.
+
+<div align="center">
+    <img width="40%" src="images/cryptonomicon_logo.png">
+    <img width="40%" src="images/aes_ecb_cryptonomicon_logo.png">
+</div>
+
+Con imágenes con menos patrones se siguen percibiendo algunas franjas de color.
+
+> [Ver implementación de cifrado de imágenes usando AES en modo ECB.](scripts/aes_ecb_image_cipher.py)
+
+
+##### Byte-at-a-time
+
+En este ataque se necesita tener acceso a una entrada de datos que devuelve ```AES_ECB(input || secret, key)```. El objetivo es recuperar la cadena secreta teniendo únicamente control de la entrada. 
+
+Un caso real en el que se podría encontrar una situación parecida puede ser la creación de una petición de un sistema de inicio de sesión en el que el usuario introduce un nombre que se concatena con una contraseña definida. Esta petición se envía cifrada para no exfiltrar la contraseña y el atacante puede observar las salidas de sus entradas. 
+
+> [Ver implementación de petición vulnerable usando AES en modo ECB.](scripts/aes_ecb_vulnerable_query.py)
+
+La situación del caso práctico es ```AES_ECB("{'usuario':" || input || ", 'password': " || secret || "}", key)``` y aunque es vulnerable con fines didácticos se explica el ataque con el ejemplo inicial:
+
+```AES_ECB(input || secret, key)```
+
+AES utiliza un tamaño de bloque de 128 bits. En cada bloque pueden ser almacenados 16 caracteres. 
+
+1. Se envía como entrada una secuencia de datos conocidos del tamaño en bytes menos uno. Por ejemplo, con nuestro tamaño de bloque de 16 bytes (128 bits), se envían 15 caracteres ```AAAAAAAAAAAAAAA```.
+
+2. Nuestro primer bloque cifrado, siguiendo la teoría del modo ECB, será ```AES_ECB(AAAAAAAAAAAAAAA || s0, key)``` siendo $s_0$ en primer byte de la cadena secreta.
+
+3. Se cifran las 256 combinaciones posibles de ese primer byte. ```AES_ECB(AAAAAAAAAAAAAAA || A, key)```, ```AES_ECB(AAAAAAAAAAAAAAA || B, key)```, ```AES_ECB(AAAAAAAAAAAAAAA || C, key)```... Uno de ellos será igual al bloque generado en el paso 2. Ese byte se corresponde a $s_0$.
+
+4. Para conseguir los siguientes bytes se disminuye el número de As. Imaginemos que el primer byte del secreto es la letra f. Para el segundo byte se calcula el bloque de referencia ```AES_ECB(AAAAAAAAAAAAAA, key)``` y se hará fuerza bruta sobre $s_1$ generando los bloques ```AES_ECB(AAAAAAAAAAAAAA || f || s1, key)```.De esta manera se puede obtener el secreto si su longitud es menor que 16 bytes. 
+
+5. Para longitudes mayores que el tamaño del bloque el procedimiento sigue siendo el mismo pero tomando como referencia otro bloque. Siendo el secreto ```flag{byte_at_a_time_attack}``` con los primeros 4 pasos se ha obtenido la cadena ```flag{byte_at_a_t```. Se cifran de nuevo 15 As y se mira el segundo bloque. El segundo bloque es ```AES_ECB(lag{byte_at_a_t || s16, key)```. Se generan todos los bloques con $s_{16}$ y se puede continuar este proceso hasta recuperar todos los caracteres.
+
+> [Ver implementación del ataque a ECB Byte-at-a-time.](scripts/aes_ecb_byte_at_a_time.py)
 
 
 ### CBC (Cipher block chaining)
