@@ -334,5 +334,4 @@ flag = pow(ciphertext, t3, n)
 print(long_to_bytes(flag))
 ```
 
-
 > **flag: CTF{C0nGr@tz_RiV35t_5h4MiR_nD_Ad13MaN_W0ulD_b_h@pPy}**
