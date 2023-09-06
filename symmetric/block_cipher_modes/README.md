@@ -1,6 +1,6 @@
 # Modos de operación de cifrado de bloques
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-60%25-brightgreen)]()
+[![development_tag](https://img.shields.io/badge/en%20desarrollo-65%25-brightgreen)]()
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
@@ -34,6 +34,8 @@ Para comprender los modos de operación de cifrados de bloques, se recomienda te
     2. [CBC (Cipher block chaining)](#cbc-cipher-block-chaining)
         1. [Esquema](#esquema-1)
         2. [Ecuaciones](#ecuaciones-1)
+        3. [Criptoanálisis](#criptoanc3a1lisis-1)
+            1. [Padding oracle attack](#padding-oracle-attack)
     3. [PCBC (Propagation cipher block chaining)](#pcbc-propagation-cipher-block-chaining)
         1. [Esquema](#esquema-2)
         2. [Ecuaciones](#ecuaciones-2)
@@ -78,7 +80,7 @@ Durante la explicación de cada modo, se van a utilizar de referencia distintos 
 * **Mensaje cifrado**. Mensaje producto de la encriptación.
 * **Clave**. Clave secreta del cifrado simétrico.
 * **XOR**. Realiza la operación XOR de los dos elementos entrantes.
-* **Vector inicializador (IV)**. Bloque de bits para aumentar la aleatoriedad.
+* **Vector inicializador (IV)**. Bloque de bits generados aleatoriamente para aumentar el caos.
 
 
 ### Sistema de representación 2: ecuaciones
@@ -169,7 +171,7 @@ AES utiliza un tamaño de bloque de 128 bits. En cada bloque pueden ser almacena
 
 5. Para longitudes mayores que el tamaño del bloque el procedimiento sigue siendo el mismo pero tomando como referencia otro bloque. Siendo el secreto ```flag{byte_at_a_time_attack}``` con los primeros 4 pasos se ha obtenido la cadena ```flag{byte_at_a_t```. Se cifran de nuevo 15 As y se mira el segundo bloque. El segundo bloque es ```AES_ECB(lag{byte_at_a_t || s16, key)```. Se generan todos los bloques con $s_{16}$ y se puede continuar este proceso hasta recuperar todos los caracteres.
 
-> [Ver implementación del ataque a ECB Byte-at-a-time.](scripts/aes_ecb_byte_at_a_time.py)
+> [Ver implementación del ataque a ECB byte-at-a-time.](scripts/aes_ecb_byte_at_a_time.py)
 
 
 ### CBC (Cipher block chaining)
@@ -201,6 +203,57 @@ En otro caso:
 $$C_i = E_K(P_i \oplus C_{i - 1})$$
 
 $$P_i = D_K(C_i) \oplus C_{i - 1}$$
+
+
+#### Criptoanálisis
+
+El modo CBC ha sido considerado vulnerable en numerosas ocasiones. Sus [propiedades de robustez o la ignorancia](https://www.quora.com/Why-is-the-CBC-mode-of-encryption-still-used-instead-of-CTR-mode-even-though-CBC-mode-has-proven-to-be-vulnerable-ex-poodle-attack) de algunas empresas han podido ser las responsables de que aún a día de hoy siga en uso. Sin embargo, ninguna entidad ha podido pasar por alto la vulnerabilidad conocida como [POODLE](https://en.wikipedia.org/wiki/POODLE).
+
+
+##### Padding oracle attack
+
+La palabra POODLE proviene de las iniciales Padding Oracle On Downgraded Legacy Encryption ([CVE-2014-3566](https://cve.mitre.org/cgi-bin/cvename.cgi?name=cve-2014-3566)). La teoría de este ataque fue publicada en 2002 por el criptólogo [Serge Vaudenay](https://en.wikipedia.org/wiki/Serge_Vaudenay), y no solo afecta al modo CBC, sino que también se pueden encontrar vulnerabilidades asociadas en algunos [modos de relleno de criptografía asimétrica (OAEP)](https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding).
+
+En la sección de [ejemplo de aplicación](#ejemplo-de-aplicación) se explica que si un bloque de información no cumple con la cantidad de bits requerida por el cifrado simétrico, se completa con valores definidos por un algoritmo de rellenado o padding. 
+
+El algoritmo de padding utilizado en el modo CBC es el [Public Key Cryptography Standard (PKCS #7)](https://en.wikipedia.org/wiki/PKCS_7), el cual introduce repetidamente el número de bytes necesario para completar el bloque. En otras palabras, si al último bloque le faltan 4 bytes, se introducen los bytes ```\x04\x04\x04\x04```.
+
+Para que este vector de ataque esté presente, el usuario debe tener acceso a un sistema que revele información de si en un proceso de descifrado, manejado por el usuario, se ha producido algún error de relleno. Con la aparición o no de este error se obtienen datos de la información cifrada. Además, se supone que la clave es estática durante todo el ataque.
+
+Se valora un nuevo bloque de interés en nuestro esquema de desencriptado del modo CBC. Es un bloque intermedio $I$, que resulta de descifrar un bloque $i$ antes de hacer la operación XOR con el texto cifrado del bloque anterior.
+
+<p align="center">
+    <img width="60%" src="images/cbc_i.png"> 
+</p>
+
+$$I_i = D_K(C_i)$$
+
+$$P_0 = I_0 \oplus IV$$
+
+$$P_i = I_i \oplus C_{i - 1}$$
+
+Este bloque es de suma importancia, ya que permitiría obtener el texto en claro de los textos cifrados que lo generaron.
+
+En este ataque se manipulan los bloques de textos cifrados y el vector inicializador para obtener información de los bloques intermedios, lo que conduce a la recuperación del texto en claro. 
+
+1. El proceso de descifrado se reduce a un solo bloque.
+
+<p align="center">
+    <img width="40%" src="images/cbc_r.png"> 
+</p>
+
+2. Se introduce el bloque de mensaje cifrado que queremos descifrar. El bloque de mensaje cifrado anterior o $IV$ del esquema es un bloque auxiliar sobre el que se va a construir el ataque. Sabemos que el mensaje en claro es el resultado de eliminar el relleno a la salida de la operación XOR. Por ejemplo, si el último bloque del mensaje claro rellenado con el algoritmo PKCS #7 es ```je de ejemplo\x03\x03\x03``` el resultado será ```je de ejemplo```. ¿Qué sucedería si la operación XOR diera como resultado ```je de ejemplo\x03\x03\x02```? La función de eliminación del relleno fallaría y podríamos detectar el error. Este comportamiento es el que se explota por medio del bloque auxiliar.
+
+3. El bloque auxiliar se inicializa con ceros. Al reducir el problema a un solo bloque, este bloque auxiliar se introduce como el vector inicializador del esquema CBC. Se prueban todas las combinaciones para el último byte en busca del byte que no produzca error de relleno. De esta manera, el mensaje en claro será: 
+$$P'_{15} = IV_{15} \oplus I_{15}$$
+Nótese que en este caso los índices marcan las posiciones de los bytes dentro del bloque. Se conoce $IV_{15}$ (byte introducido por fuerza bruta) y, al ser el relleno correcto, $P'_{15}$, que será 1. De aquí se obtiene el último byte del bloque intermedio.
+Este último byte de los bloques puede ser el más problemático, ya que pueden surgir falsos positivos. Un ejemplo sería si el byte $P'_{14}$ tuviera el valor de 2. En ese caso, $P'_{15}$ daría relleno correcto para 1 y para 2. Para evitar este problema se recomienda hacer una doble comprobación cambiando el penúltimo byte sumando una unidad. 
+
+4. Para los bytes siguientes el proceso es similar, con la diferencia de que para encontrar $I_{14}$ se necesitan que $P'_{14}$ y $P'_{15}$ sean iguales a 2. Aprovechando las propiedades de XOR y conociendo $I_{15}$, el último byte de nuestro $IV$ malicioso será $IV_{15} = I_{15} \oplus 2$. Cuando se opere por la función en el XOR se hará $I_{15} \oplus I_{15} \oplus 2 = 0 \oplus 2 = 2$ y volvemos al proceso del paso 3 con el byte 14 buscando el deseado 2. $I_{14}$ será $IV_{14} \oplus 2$.
+
+5. Estos pasos se pueden repetir para cualquier bloque de texto cifrado, y una vez obtenidos todos los bloques intermedios, solo es necesario realizar la operación XOR con el vector inicializador y los bloques cifrados iniciales.
+
+> [Ver implementación del ataque a CBC padding oracle attack.](scripts/aes_ecb_byte_at_a_time.py)
 
 
 ### PCBC (Propagation cipher block chaining)

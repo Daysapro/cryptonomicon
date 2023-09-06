@@ -17,7 +17,7 @@ Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de
         - [Modos de operación de cifrado de bloques](/symmetric/block_cipher_modes/README.md)
     - **Criptografía asimétrica**
         - [Diffie-Hellman](/asymmetric/diffie-hellman/README.md)
-- **Soluciones competiciones CTF**
+- **Soluciones de competiciones CTF**
     - [CTFZone 2023 Quals](/writeups/CTFZone_2023_Quals/README.md)
     - [ImaginaryCTF 2023](/writeups/ImaginaryCTF_2023/README.md)
     - [Google CTF 2023](/writeups/Google_CTF_2023/README.md)

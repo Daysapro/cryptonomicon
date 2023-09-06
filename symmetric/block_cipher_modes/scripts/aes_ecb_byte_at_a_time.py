@@ -11,6 +11,7 @@ from os import urandom
 from hashlib import sha1
 
 
+key = urandom(16)
 secret = b"flag{byte_at_a_time_attack}"
 
 def aes_ecb(key, input):
@@ -21,8 +22,6 @@ def aes_ecb(key, input):
     cipher =  AES.new(key, AES.MODE_ECB)
     return cipher.encrypt(pad(plaintext, 16))
 
-
-key = urandom(16)
 
 guessed_secret = b""
 n_block = 0
