@@ -4,7 +4,7 @@
 
 [![ctf_tag](https://img.shields.io/:CTF-2ecc71.svg?labelColor=472D27&color=472D27)]() [![prng_tag](https://img.shields.io/:PRNG-2ecc71.svg?labelColor=008F39&color=008F39)]() [![public_key_tag](https://img.shields.io/:clave%20pública-2ecc71.svg?labelColor=FF0000&color=FF0000)]() [![modular_arithmetic_tag](https://img.shields.io/:aritmética%20modular-2ecc71.svg?labelColor=149AFF&color=149AFF)]()
 
-> **12/08/2023 11:00 CEST - 13/08/2023 23:00 CEST** 
+> **12/08/2023 11:00 CEST - 13/08/2023 23:00 CEST**
 
 Todo el código desarrollado se puede consultar en la carpeta de scripts.
 
