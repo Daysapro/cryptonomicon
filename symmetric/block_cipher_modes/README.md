@@ -36,9 +36,12 @@ Para comprender los modos de operación de cifrados de bloques, se recomienda te
         2. [Ecuaciones](#ecuaciones-1)
         3. [Criptoanálisis](#criptoanc3a1lisis-1)
             1. [Padding oracle attack](#padding-oracle-attack)
+            2. [Bit-flipping attack](#bit-flipping-attack)
+            3. [IV = key](#iv--key)
     3. [PCBC (Propagation cipher block chaining)](#pcbc-propagation-cipher-block-chaining)
         1. [Esquema](#esquema-2)
         2. [Ecuaciones](#ecuaciones-2)
+        3. [Criptoanálisis](#criptoanc3a1lisis-2)
 3. [Modos de operación de bloques en flujo](#modos-de-operación-de-bloques-en-flujo)
     1. [CFB (Cipher feedback)](#cfb-cipher-feedback)
         1. [Esquema](#esquema-3)
@@ -171,7 +174,7 @@ AES utiliza un tamaño de bloque de 128 bits. En cada bloque pueden ser almacena
 
 5. Para longitudes mayores que el tamaño del bloque el procedimiento sigue siendo el mismo pero tomando como referencia otro bloque. Siendo el secreto ```flag{byte_at_a_time_attack}``` con los primeros 4 pasos se ha obtenido la cadena ```flag{byte_at_a_t```. Se cifran de nuevo 15 As y se mira el segundo bloque. El segundo bloque es ```AES_ECB(lag{byte_at_a_t || s16, key)```. Se generan todos los bloques con $s_{16}$ y se puede continuar este proceso hasta recuperar todos los caracteres.
 
-> [Ver implementación del ataque a ECB byte-at-a-time.](scripts/aes_ecb_byte_at_a_time.py)
+> [Ver implementación del ataque byte-at-a-time a ECB.](scripts/aes_ecb_byte_at_a_time.py)
 
 
 ### CBC (Cipher block chaining)
@@ -252,7 +255,67 @@ Este último byte de los bloques puede ser el más problemático, ya que pueden 
 
 5. Estos pasos se pueden repetir para cualquier bloque de texto cifrado, y una vez obtenidos todos los bloques intermedios, solo es necesario realizar la operación XOR con el vector inicializador y los bloques cifrados iniciales.
 
-> [Ver implementación del ataque a CBC padding oracle attack.](scripts/aes_ecb_byte_at_a_time.py)
+> [Ver implementación del ataque padding oracle a CBC.](scripts/aes_ecb_byte_at_a_time.py)
+
+
+##### Bit-flipping attack
+
+Un servidor web tramita peticiones de inicio de sesión según los siguientes parámetros:
+
+```user=user&password=password&admin=0```
+
+Los campos ```user``` y ```password``` son introducidos por el cliente mientras que el campo ```admin``` se envía por defecto en 0. Como la empresa no quiere que cualquier cliente pueda introducir el valor ```admin``` 1 y entrar al panel de control, envía la petición cifrada utilizando el sistema de cifrado AES en modo CBC, petición que pasa por el cliente.
+
+En esta situación un atacante puede manipular el valor de ```admin``` sin conocer el valor de la clave.
+
+1. Se calcula la posición del carácter que se quiere modificar. En el caso de ```user=user&password=password&admin=0``` el primer bloque sería ```user=user&passwo```, el segundo ```rd=password&admi``` y el tercero ```n=0\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13```. El byte que queremos modificar es el tercero del tercer bloque.
+
+2. Considerando el esquema de descifrado de un bloque en modo CBC:
+
+<p align="center">
+    <img width="40%" src="images/cbc_r.png"> 
+</p>
+
+Se conoce el byte del bloque cifrado anterior, y sabemos que nuestro byte de interés en el mensaje en claro es 0. Por tanto, se puede calcular el byte del bloque intermedio. Con esta información, se puede forzar que el byte del bloque anterior operado por XOR con el byte intermedio sea 1. Se cambia ese byte y ```admin``` vale 1.
+
+Por ejemplo, nuestro segundo bloque ```rd=password&admi``` cifrado con una clave aleatoria es ```\xd2#\xcb\x8c\xceA<\xddz\x9d\x0c\x03\xc5\xc2\xc2\x8c```:
+
+$$I_2 = ord(/xcb) \oplus ord(0) = 61 \oplus 48 = 13$$
+
+Siendo ```ord``` la operación de convertir un byte a su representación entera. Nótese que en este caso los índices marcan las posiciones de los bytes dentro de los bloques.
+
+Se busca que $P\prime_{2}$ sea 1, por lo que:
+
+$$C\prime_2 = I_2 \oplus P\prime_{2} = 13 \oplus ord(1) = 13 \oplus 60 = 49$$
+
+El bloque cifrado nuevo debe ser: ```\xd2#1\x8c\xceA<\xddz\x9d\x0c\x03\xc5\xc2\xc2\x8c```, siendo ```1``` la conversión en bytes del número 49.
+
+Este ataque implica la manipulación del bloque cifrado anterior, que tras pasar por el descifrado perderá por completo el sentido. En situaciones en las que ese bloque se interprete posteriormente el programa intérprete podría detectar el ataque y mitigarlo.
+
+> [Ver implementación del ataque bit-flipping a CBC.](scripts/aes_ecb_byte_at_a_time.py)
+
+
+##### IV = key
+
+Hay empresas que fruto del desconocimiento usaron como vector inicializador la misma clave de cifrado y, como es lógico, no lo hacían público. Esta práctica, aunque supone una mejora en consumo de recursos computacionales, es muy poco segura, como se demuestra a continuación.
+
+1. Se cifra un mensaje de un bloque $P_0$.
+
+$$C_0 = E_K(P_0 \oplus IV)$$
+
+$$C_0 = E_K(P_0 \oplus key)$$
+
+$$P_0 = D_K(C_0) \oplus key$$
+
+2. Se descifra un mensaje de dos bloques $(0, C_0)$, siendo 0 un bloque completo de ceros.
+
+$$P_0\prime = D_K(0) \oplus key$$
+
+$$P_1\prime = D_K(C_0) \oplus 0 = D_K(C_0)$$
+
+3. Se calcula $P_0 \oplus P_1\prime$.
+
+$$P_0 \oplus P_1\prime = D_K(C_0) \oplus key \oplus D_K(C_0) = key$$
 
 
 ### PCBC (Propagation cipher block chaining)
@@ -284,6 +347,23 @@ En otro caso:
 $$C_i = E_K(P_i \oplus P_{i - 1} \oplus C_{i - 1})$$
 
 $$P_i = D_K(C_i) \oplus C_{i - 1} \oplus P_{i - 1}$$
+
+
+#### Criptoanálisis
+
+El uso del modo PCBC siempre ha sido muy reducido. Se utilizó en el protocolo de autentificación [Kerberos](https://en.wikipedia.org/wiki/Kerberos_(protocol)) en su versión 4, pero acabó siendo descartado en la posterior. Pese a que el uso de PCBC fuera muy llamativo por sus propiedades de propagación del caos, el motivo detrás de la retirada fue el descubrimiento de un error de propagación entre bloques, ya que si se intercambian dos bloques de cifrado adyacentes el descifrado de los bloques siguientes no era afectado. Además, en la implementación las pruebas de integración de mensajes comprobaban los mensajes en claro de los últimos bloques, pruebas que no detectaban el error.
+
+$$P_i = D_K(C_i) \oplus C_{i - 1} \oplus P_{i - 1}$$
+
+$$P_{i - 1} = D_K(C_{i - 1}) \oplus C_{i - 2} \oplus P_{i - 2}$$
+
+$$P_{i - 2} = D_K(C_{i - 2}) \oplus C_{i - 3} \oplus P_{i - 3}$$
+
+$$P_i = D_K(C_i) \oplus C_{i - 1} \oplus D_K(C_{i - 1}) \oplus C_{i - 2} \oplus D_K(C_{i - 2}) \oplus C_{i - 3} \oplus P_{i - 3}$$
+
+Intercambiando $C_{i - 1}$ por $C_{i - 2}$ el resultado de nuestro $P_i$ es el mismo.
+
+$$P_i = D_K(C_i) \oplus C_{i - 2} \oplus D_K(C_{i - 2}) \oplus C_{i - 1} \oplus D_K(C_{i - 1}) \oplus C_{i - 3} \oplus P_{i - 3}$$
 
 
 ## Modos de operación de bloques en flujo
@@ -371,7 +451,7 @@ $$...$$
 
 ### CTR (Counter)
 
-El modo CTR es el modo más aceptado y usado en la actualidad. Se parte desde un $IV$ el cual es concatenado, sumado o operado con XOR con un contador. Este contador va aumentando en una unidad por cada bloque y es el bloque resultado de la encriptación $IV$ y contador el que se opera por XOR con el texto en claro.
+El modo CTR es el modo más aceptado y usado en la actualidad. Se parte desde un $IV$ el cual es concatenado, sumado u operado con XOR con un contador. Este contador va aumentando en una unidad por cada bloque y es el bloque resultado de la encriptación $IV$ y contador el que se opera por XOR con el texto en claro.
 
 La forma en la que se une el vector inicializador con el contador depende de la seguridad de la generación del vector y del servicio al que se disponga el sistema criptográfico.
 

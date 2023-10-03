@@ -159,7 +159,7 @@ Fichero cifrado.
 
 La secuencia de valores se calcula según:
 
-$$X_{n + 1} \equiv (m \cdot X_n + c) \bmod n$$
+$$X_{i + 1} \equiv (m \cdot X_i + c) \bmod n$$
 
 Donde $X_0$ es el valor inicial o semilla.
 

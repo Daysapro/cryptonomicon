@@ -139,7 +139,7 @@ La elección adecuada de parámetros es crucial para la seguridad del intercambi
 Además, también es importante seleccionar un tamaño lo suficientemente grande de claves $a$ y $b$ y elegir un generador válido $g$.
 
 
-#### Orden del grupo $G$ y Pohlig-Hellman
+#### Orden del grupo G y Pohlig-Hellman
 
 El orden de un grupo $G$ se refiere al número de elementos que hay en el grupo. Equivale a $p - 1$.
 
@@ -160,7 +160,7 @@ En la realidad, para evitar este ataque se busca que $p$ sea lo que se denomina 
 > [Ver caso práctico de Pohlig-Hellman.](scripts/pohlig_hellman.py)
 
 
-#### Propiedades del generador $g$
+#### Propiedades del generador g
 
 El generador $g$ en el intercambio de claves Diffie-Hellman o raíz primitiva de $p$ es un valor entre $2$ y $p - 1$ que, elevado a sucesivas potencias, devuelve todos los elementos del grupo $G$ sin ciclos. Por ejemplo, si consideramos el grupo multiplicativo ${1, 2, 3, 4, 5, 6}$, el valor 3 es generador porque:
 
@@ -196,12 +196,12 @@ En el intercambio de claves Diffie-Hellman, este atacante podría recibir de Ali
 </p>
 
 
-#### Manipulación del parámetro $g$
+#### Manipulación del parámetro g
 
 En esta sección se van a analizar distintos escenarios en los que se manipula el valor del generador, junto con sus respectivas explotaciones. En estos ataques se cambiará el valor de $g$ original por uno malicioso $g'$ mientras que $p$, $A$ y $B$ se mantendrán igual.
 
 
-##### $g = 1$
+##### g = 1
 
 Si Eva introduce $g = 1$, Bob calcula $B \equiv 1^b \bmod p \equiv 1$. 
 La clave compartida para Alicia será $S \equiv 1^a \bmod p \equiv 1$. 
@@ -209,7 +209,7 @@ La clave compartida para Alicia será $S \equiv 1^a \bmod p \equiv 1$.
 > [Ver caso práctico g = 1.](scripts/generator_1.py)
 
 
-##### $g = p$
+##### g = p
 
 Si Eva introduce $g = p$, Bob calcula $B \equiv p^b \bmod p \equiv 0$.
 La clave compartida para Alicia será $S \equiv 0^a \bmod p \equiv 0$.
@@ -218,7 +218,7 @@ En el caso $g = 0$ el resultado es el mismo.
 > [Ver caso práctico g = p.](scripts/generator_p.py)
 
 
-##### $g = p - 1$
+##### g = p - 1
 
 Si Eva introduce $g = p - 1$, Bob calcula $B \equiv {(p - 1)}^b \bmod p$.
 
@@ -239,7 +239,7 @@ La clave compartida para Alicia será $S \equiv 1^a \bmod p \equiv 1$ o $S \equi
 > [Ver caso práctico g = p - 1.](scripts/generator_p_1.py)
 
 
-##### $g = A$
+##### g = A
 
 Si Eva introduce $g = A$, Bob calcula $B \equiv A^b \bmod p$.
 Eva intercepta $B$, siendo $B \equiv A^b \bmod p \equiv g^{ab} \bmod p \equiv S$.
@@ -251,7 +251,7 @@ Este ataque se presenta en muy pocas situaciones, ya que Eva debe enviar una $B$
 Cabe señalar que, exceptuando el último caso, solo podríamos leer mensajes de Alicia porque la clave consensuada maliciosa solo la tendría ella.
 
 
-#### Manipulación de los parámetros $A$ y $B$
+#### Manipulación de los parámetros A y B
 
 En los parámetros $A$ y $B$ se pueden implementar los mismos ataques que en $g$.
 
@@ -264,7 +264,7 @@ $$A = p - 1 \rightarrow S \equiv (p - 1)^b \bmod p \equiv 1 | (p - 1)$$
 De la misma forma, se podrían indicar los mismos valores $B$ a Alicia y todos los mensajes serían legibles.
 
 
-#### Manipulación del primo $p$
+#### Manipulación del primo p
 
 El primo $p$ es el encargado de asegurar el logaritmo discreto. Un atacante podría introducir un primo no demasiado grande para poder hacer fuerza bruta y calcular la clave compartida. Si el sistema solo comprobara el tamaño del número, se podría generar un primo vulnerable al ataque Pohlig-Hellman, como está descrito en la sección de [orden del grupo y Pohlig-Hellman](#orden-del-grupo-y-pohlig-hellman).
 

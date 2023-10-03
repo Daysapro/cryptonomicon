@@ -15,10 +15,10 @@ from hashlib import sha1
 
 password = "admin123"
 
-print("Nombre de usuario: ")
+print("Nombre de usuario:")
 user = input()
 
-query = {"usuario": user, "password": password}
+query = {"user": user, "password": password}
 
 key = urandom(16)
 hash = sha1()
