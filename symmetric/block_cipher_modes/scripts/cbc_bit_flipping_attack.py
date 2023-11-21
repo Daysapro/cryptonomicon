@@ -1,5 +1,5 @@
 '''
-Implementación del ataque bit-flipping attack del modo CBC.
+Implementación del ataque bit-flipping attack al modo CBC.
 
 Autor: Daysapro.
 '''
@@ -20,7 +20,7 @@ def aes_cbc_encrypt(key, input, iv):
     hash = sha1()
     hash.update(str(key).encode('ascii'))
     key = hash.digest()[:BLOCK_SIZE]
-    cipher =  AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
     return cipher.encrypt(pad(input, BLOCK_SIZE))
 
 def aes_cbc_decrypt(key, input, iv):

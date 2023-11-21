@@ -1,5 +1,5 @@
 '''
-Implementación del ataque byte-at-a-time del modo ECB con la entrada concatenada al inicio.
+Implementación del ataque byte-at-a-time al modo ECB con la entrada concatenada al inicio.
 
 Autor: Daysapro.
 '''
@@ -20,13 +20,12 @@ def aes_ecb(key, input):
     hash = sha1()
     hash.update(str(key).encode('ascii'))
     key = hash.digest()[:BLOCK_SIZE]
-    cipher =  AES.new(key, AES.MODE_ECB)
+    cipher = AES.new(key, AES.MODE_ECB)
     return cipher.encrypt(pad(plaintext, BLOCK_SIZE))
 
 
 guessed_secret = b""
 n_block = 0
-
 while True:
     for i in range(15, -1, -1):
         input = b"A" * i

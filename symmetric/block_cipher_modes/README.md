@@ -1,6 +1,6 @@
 # Modos de operación de cifrado de bloques
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-65%25-brightgreen)]()
+[![development_tag](https://img.shields.io/badge/en%20desarrollo-75%25-brightgreen)]()
 
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
@@ -34,21 +34,29 @@ Para comprender los modos de operación de cifrados de bloques, se recomienda te
     2. [CBC (Cipher block chaining)](#cbc-cipher-block-chaining)
         1. [Esquema](#esquema-1)
         2. [Ecuaciones](#ecuaciones-1)
-        3. [Criptoanálisis](#criptoanc3a1lisis-1)
+        3. [Criptoanálisis](#criptoanálisis-1)
             1. [Padding oracle attack](#padding-oracle-attack)
             2. [Bit-flipping attack](#bit-flipping-attack)
             3. [IV = key](#iv--key)
     3. [PCBC (Propagation cipher block chaining)](#pcbc-propagation-cipher-block-chaining)
         1. [Esquema](#esquema-2)
         2. [Ecuaciones](#ecuaciones-2)
-        3. [Criptoanálisis](#criptoanc3a1lisis-2)
+        3. [Criptoanálisis](#criptoanálisis-2)
 3. [Modos de operación de bloques en flujo](#modos-de-operación-de-bloques-en-flujo)
     1. [CFB (Cipher feedback)](#cfb-cipher-feedback)
         1. [Esquema](#esquema-3)
+            1. [CFB tradicional](#cfb-tradicional)
+            2. [CFB-s](#cfb-s)
         2. [Ecuaciones](#ecuaciones-3)
+            1. [CFB tradicional](#cfb-tradicional-1)
+            2. [CFB-s](#cfb-s-1)
+        3. [Criptoanálisis](#criptoanálisis-3)
+            1. [Zerologon](#zerologon)
     2. [OFB (Output feedback)](#ofb-output-feedback)
         1. [Esquema](#esquema-4)
-        2. [Ecuaciones](#ecuaciones-4)  
+        2. [Ecuaciones](#ecuaciones-4)
+        3. [Criptoanálisis](#criptoanálisis-4)
+            1. [Ataque de texto claro conocido](#ataque-de-texto-claro-conocido)
     3. [CTR (Counter)](#ctr-counter)
         1. [Esquema](#esquema-5)
         2. [Ecuaciones](#ecuaciones-5)
@@ -135,19 +143,19 @@ Se considera que el problema del modo ECB recae en la falta de difusión del cao
 
 <div align="center">
     <img width="40%" src="images/daysapro.png">
-    <img width="40%" src="images/aes_ecb_daysapro.png">
+    <img width="40%" src="images/ecb_daysapro.png">
 </div>
 
 A la derecha, aún habiendo cifrado con AES utilizando ECB, se sigue leyendo la palabra sin problema.
 
 <div align="center">
     <img width="40%" src="images/cryptonomicon_logo.png">
-    <img width="40%" src="images/aes_ecb_cryptonomicon_logo.png">
+    <img width="40%" src="images/ecb_cryptonomicon_logo.png">
 </div>
 
 Con imágenes con menos patrones se siguen percibiendo algunas franjas de color.
 
-> [Ver implementación de cifrado de imágenes usando AES en modo ECB.](scripts/aes_ecb_image_cipher.py)
+> [Ver implementación de cifrado de imágenes usando AES en modo ECB.](scripts/ecb_image_cipher.py)
 
 
 ##### Byte-at-a-time
@@ -156,7 +164,7 @@ En este ataque se necesita tener acceso a una entrada de datos que devuelve ```A
 
 Un caso real en el que se podría encontrar una situación parecida puede ser la creación de una petición de un sistema de inicio de sesión en el que el usuario introduce un nombre que se concatena con una contraseña definida. Esta petición se envía cifrada para no exfiltrar la contraseña y el atacante puede observar las salidas de sus entradas. 
 
-> [Ver implementación de petición vulnerable usando AES en modo ECB.](scripts/aes_ecb_vulnerable_query.py)
+> [Ver implementación de petición vulnerable usando AES en modo ECB.](scripts/ecb_vulnerable_query.py)
 
 La situación del caso práctico es ```AES_ECB("{'usuario':" || input || ", 'password': " || secret || "}", key)``` y aunque es vulnerable con fines didácticos se explica el ataque con el ejemplo inicial:
 
@@ -174,7 +182,7 @@ AES utiliza un tamaño de bloque de 128 bits. En cada bloque pueden ser almacena
 
 5. Para longitudes mayores que el tamaño del bloque el procedimiento sigue siendo el mismo pero tomando como referencia otro bloque. Siendo el secreto ```flag{byte_at_a_time_attack}``` con los primeros 4 pasos se ha obtenido la cadena ```flag{byte_at_a_t```. Se cifran de nuevo 15 As y se mira el segundo bloque. El segundo bloque es ```AES_ECB(lag{byte_at_a_t || s16, key)```. Se generan todos los bloques con $s_{16}$ y se puede continuar este proceso hasta recuperar todos los caracteres.
 
-> [Ver implementación del ataque byte-at-a-time a ECB.](scripts/aes_ecb_byte_at_a_time.py)
+> [Ver implementación del ataque byte-at-a-time al modo ECB.](scripts/ecb_byte_at_a_time.py)
 
 
 ### CBC (Cipher block chaining)
@@ -247,15 +255,15 @@ En este ataque se manipulan los bloques de textos cifrados y el vector inicializ
 
 2. Se introduce el bloque de mensaje cifrado que queremos descifrar. El bloque de mensaje cifrado anterior o $IV$ del esquema es un bloque auxiliar sobre el que se va a construir el ataque. Sabemos que el mensaje en claro es el resultado de eliminar el relleno a la salida de la operación XOR. Por ejemplo, si el último bloque del mensaje claro rellenado con el algoritmo PKCS #7 es ```je de ejemplo\x03\x03\x03``` el resultado será ```je de ejemplo```. ¿Qué sucedería si la operación XOR diera como resultado ```je de ejemplo\x03\x03\x02```? La función de eliminación del relleno fallaría y podríamos detectar el error. Este comportamiento es el que se explota por medio del bloque auxiliar.
 
-3. El bloque auxiliar se inicializa con ceros. Al reducir el problema a un solo bloque, este bloque auxiliar se introduce como el vector inicializador del esquema CBC. Se prueban todas las combinaciones para el último byte en busca del byte que no produzca error de relleno. De esta manera, el mensaje en claro será $P\prime_{15} = IV_{15} \oplus I_{15}$.
-Nótese que en este caso los índices marcan las posiciones de los bytes dentro del bloque. Se conoce $IV_{15}$ (byte introducido por fuerza bruta) y, al ser el relleno correcto, $P\prime_{15}$, que será 1. De aquí se obtiene el último byte del bloque intermedio.
-Este último byte de los bloques puede ser el más problemático, ya que pueden surgir falsos positivos. Un ejemplo sería si el byte $P\prime_{14}$ tuviera el valor de 2. En ese caso, $P\prime_{15}$ daría relleno correcto para 1 y para 2. Para evitar este problema se recomienda hacer una doble comprobación cambiando el penúltimo byte sumando una unidad. 
+3. El bloque auxiliar se inicializa con ceros. Al reducir el problema a un solo bloque, este bloque auxiliar se introduce como el vector inicializador del esquema CBC. Se prueban todas las combinaciones para el último byte en busca del byte que no produzca error de relleno. De esta manera, el mensaje en claro será $P^\prime_{15} = IV_{15} \oplus I_{15}$.
+Nótese que en este caso los índices marcan las posiciones de los bytes dentro del bloque. Se conoce $IV_{15}$ (byte introducido por fuerza bruta) y, al ser el relleno correcto, $P^\prime_{15}$, que será 1. De aquí se obtiene el último byte del bloque intermedio.
+Este último byte de los bloques puede ser el más problemático, ya que pueden surgir falsos positivos. Un ejemplo sería si el byte $P^\prime_{14}$ tuviera el valor de 2. En ese caso, $P^\prime_{15}$ daría relleno correcto para 1 y para 2. Para evitar este problema se recomienda hacer una doble comprobación cambiando el penúltimo byte sumando una unidad. 
 
-4. Para los bytes siguientes el proceso es similar, con la diferencia de que para encontrar $I_{14}$ se necesitan que $P\prime_{14}$ y $P\prime_{15}$ sean iguales a 2. Aprovechando las propiedades de XOR y conociendo $I_{15}$, el último byte de nuestro $IV$ malicioso será $IV_{15} = I_{15} \oplus 2$. Cuando se opere por la función en el XOR se hará $I_{15} \oplus I_{15} \oplus 2 = 0 \oplus 2 = 2$ y volvemos al proceso del paso 3 con el byte 14 buscando el deseado 2. $I_{14}$ será $IV_{14} \oplus 2$.
+4. Para los bytes siguientes el proceso es similar, con la diferencia de que para encontrar $I_{14}$ se necesitan que $P^\prime_{14}$ y $P^\prime_{15}$ sean iguales a 2. Aprovechando las propiedades de XOR y conociendo $I_{15}$, el último byte de nuestro $IV$ malicioso será $IV_{15} = I_{15} \oplus 2$. Cuando se opere por la función en el XOR se hará $I_{15} \oplus I_{15} \oplus 2 = 0 \oplus 2 = 2$ y volvemos al proceso del paso 3 con el byte 14 buscando el deseado 2. $I_{14}$ será $IV_{14} \oplus 2$.
 
 5. Estos pasos se pueden repetir para cualquier bloque de texto cifrado, y una vez obtenidos todos los bloques intermedios, solo es necesario realizar la operación XOR con el vector inicializador y los bloques cifrados iniciales.
 
-> [Ver implementación del ataque padding oracle a CBC.](scripts/aes_ecb_byte_at_a_time.py)
+> [Ver implementación del ataque padding oracle al modo CBC.](scripts/ecb_byte_at_a_time.py)
 
 
 ##### Bit-flipping attack
@@ -284,15 +292,15 @@ $$I_2 = ord(/xcb) \oplus ord(0) = 61 \oplus 48 = 13$$
 
 Siendo ```ord``` la operación de convertir un byte a su representación entera. Nótese que en este caso los índices marcan las posiciones de los bytes dentro de los bloques.
 
-Se busca que $P\prime_{2}$ sea 1, por lo que:
+Se busca que $P^\prime_2$ sea 1, por lo que:
 
-$$C\prime_2 = I_2 \oplus P\prime_{2} = 13 \oplus ord(1) = 13 \oplus 60 = 49$$
+$$C^\prime_2 = I_2 \oplus P^\prime_2 = 13 \oplus ord(1) = 13 \oplus 60 = 49$$
 
 El bloque cifrado nuevo debe ser: ```\xd2#1\x8c\xceA<\xddz\x9d\x0c\x03\xc5\xc2\xc2\x8c```, siendo ```1``` la conversión en bytes del número 49.
 
 Este ataque implica la manipulación del bloque cifrado anterior, que tras pasar por el descifrado perderá por completo el sentido. En situaciones en las que ese bloque se interprete posteriormente el programa intérprete podría detectar el ataque y mitigarlo.
 
-> [Ver implementación del ataque bit-flipping a CBC.](scripts/aes_ecb_byte_at_a_time.py)
+> [Ver implementación del ataque bit-flipping al modo CBC.](scripts/ecb_byte_at_a_time.py)
 
 
 ##### IV = key
@@ -309,13 +317,13 @@ $$P_0 = D_K(C_0) \oplus key$$
 
 2. Se descifra un mensaje de dos bloques $(0, C_0)$, siendo 0 un bloque completo de ceros.
 
-$$P_0\prime = D_K(0) \oplus key$$
+$$P^\prime_0 = D_K(0) \oplus key$$
 
-$$P_1\prime = D_K(C_0) \oplus 0 = D_K(C_0)$$
+$$P^\prime_1 = D_K(C_0) \oplus 0 = D_K(C_0)$$
 
-3. Se calcula $P_0 \oplus P_1\prime$.
+3. Se calcula $P_0 \oplus P^\prime_1$.
 
-$$P_0 \oplus P_1\prime = D_K(C_0) \oplus key \oplus D_K(C_0) = key$$
+$$P_0 \oplus P^\prime_1 = D_K(C_0) \oplus key \oplus D_K(C_0) = key$$
 
 
 ### PCBC (Propagation cipher block chaining)
@@ -370,21 +378,25 @@ $$P_i = D_K(C_i) \oplus C_{i - 2} \oplus D_K(C_{i - 2}) \oplus C_{i - 1} \oplus 
 
 Como se ha explicado anteriormente, en los modos de operación de bloques en flujo el mensaje en claro es operado a través de XOR con bloques pseudoaleatorios para obtener el mensaje cifrado.
 
-Por las propiedades de la operación XOR, el uso del bloque de descifrado no es necesario en los siguientes esquemas. Denominando $S_i$ a los bloques pseudoaleatorios:
+Por las propiedades de la operación XOR, el uso del bloque de descifrado no es necesario en los siguientes esquemas. Denominando $I_i$ a los bloques pseudoaleatorios:
 
-$$C_i = S_i \oplus P_i$$
+$$C_i = I_i \oplus P_i$$
 
-$$P_i = S_i \oplus C_i$$
+$$P_i = I_i \oplus C_i$$
 
-Como $S_i$ es el resultado de un bloque cifrado, se tiene que utilizar el módulo de cifrar del cifrado simétrico incluso obteniendo los bloques $P_i$.
+Como $I_i$ es el resultado de un bloque cifrado, siempre se utiliza el módulo de cifrar del cifrado simétrico incluso obteniendo los bloques $P_i$.
 
 
 ### CFB (Cipher feedback)
 
 En este modo la entrada al cifrado simétrico es el bloque cifrado anterior. El resultado de la encriptación se opera mediante XOR con el mensaje en claro produciendo el siguiente bloque.
 
+Es importante conocer que en el modo CFB, según las recomendaciones [NIST SP800-38A](#https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-38a.pdf), se puede definir con un parámetro entero $s$, siendo $1 \leq s \leq b$ con $b$ tamaño del bloque. Este uso construye el conjunto de modos CFB-s, como CFB-1, CFB-8, CFB-128... Mientras que el esquema presenta pocos cambios respecto al modo CFB tradicional, se incorpora en sus ecuaciones una rotación de $s$ bits que añade más aleatoriedad al cifrado. 
+
 
 #### Esquema
+
+##### CFB tradicional
 
 <p align="center">
     <img width="60%" src="images/cfb_e.png"> 
@@ -395,7 +407,20 @@ En este modo la entrada al cifrado simétrico es el bloque cifrado anterior. El 
 </p>
 
 
+##### CFB-s
+
+<p align="center">
+    <img width="60%" src="images/cfbs_e.png"> 
+</p>
+
+<p align="center">
+    <img width="60%" src="images/cfbs_d.png"> 
+</p>
+
+
 #### Ecuaciones
+
+##### CFB tradicional
 
 Si $i = 0$:
 
@@ -408,6 +433,48 @@ En otro caso:
 $$C_i = E_K(C_{i - 1}) \oplus P_i$$
 
 $$P_i = E_K(C_{i - 1}) \oplus C_i$$
+
+
+##### CFB-s
+
+$$I_0 = IV$$
+
+$$I_i = ((I_{i - 1} << s) + C_i) \bmod 2^b$$
+
+$$C_i = MSB_s(E_K(I_{i - 1})) \oplus P_i$$
+
+$$P_i = MSB_s(E_K(I_{i - 1})) \oplus C_i$$
+
+$MSB_s$ representa la operación de $s$ bits más significativos. Nótese que los bloques $I$ son bloques intermedios anteriores al cifrado, no posteriores al mismo.
+
+
+#### Criptoanálisis
+
+##### Zerologon
+
+Zerologon es el nombre que recibe la vulnerabilidad [CVE-2020-1472](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-1472) que afectaba a todos los equipos que usaban el protocolo remoto Netlogon (MS-NRPC) de Microsoft. Debido a un error en la implementación de un sistema de cifrado AES-CFB8, un atacante podía iniciar sesión sin credenciales como controlador de dominio en un servicio de directorio activo.
+
+En septiembre 2020, un joven llamado Tom Tervoort publica un [artículo](https://www.secura.com/uploads/whitepapers/Zerologon.pdf) en el que demuestra que introduciendo un vector inicializador y un mensaje entero de ceros, dada una clave aleatoria, existe una probabilidad entre 256 de que el resultado de un cifrado AES-CFB8 fuera un mensaje cifrado entero de ceros.
+
+1. Se define un vector inicializador $IV$ de 16 bytes y un mensaje $P$ de 8 bytes entero de ceros.
+
+2. Según CFB-8:
+
+$$I_0 = IV$$
+
+$$C_0 = MSB_8(E_K(IV)) \oplus P_0$$
+
+La probabilidad de que el primer byte de $E_K(IV)$ fuera 0, byte que corresponde a los 8 bits más significativos ($MSB_8$), es una entre los 256 valores posibles de un byte. Cuando esto ocurre el primer byte del mensaje cifrado es 0:
+
+$$C_0 = 0 \oplus P_0 = 0 \oplus 0 = 0$$
+
+3. El nuevo bloque a pasar por el módulo cifrador se forma como $IV << 8 + C_0$. El $IV$ desplazado 8 bits a la derecha es todo ceros y $C_0$ también. Tras el cifrado se volverá a obtener en el primer byte un 0, por lo que $C_1$ tendrá el mismo destino que $C_0$.
+
+4. Y así, iterando sobre el $IV$ y los nuevos bytes cifrados, se formará un mensaje cifrado entero de ceros.
+
+Aplicando la teoría al caso de la vulnerabilidad, Tervoort descubrió que en el protocolo Netlogon el $IV$ siempre era un vector de 16 bytes de ceros. Al usuario, por otro lado, le solicita una credencial de acceso y un parámetro denominado challenge, ambos con una longitud de 8 bytes. Esta credencial es el mensaje en claro que cifraba obteniendo el mensaje cifrado, el cual se comprueba si es igual al challenge. Sabiendo las características del vector inicializador y sin límite de intentos de inicio de sesión, nada impide a un atacante introducir 256 veces dos vectores de ceros a credencial y challenge y acceder al directorio activo.
+
+> [Ver demostración de la generación de mensaje cifrado entero de ceros de la vulnerabilidad Zerologon.](scripts/cfb_zerologon.py)
 
 
 ### OFB (Output feedback)
@@ -447,6 +514,29 @@ $$C_2 = E_K(E_K(E_K(IV))) \oplus P_i$$
 $$P_2 = E_K(E_K(E_K(IV))) \oplus C_i$$
 
 $$...$$
+
+
+#### Criptoanálisis
+
+##### Ataque de texto claro conocido
+
+Un ataque de texto claro conocido o known-plaintext attack (KPA) es un modelo de ataque en el que el atacante puede obtener información confidencial en base a un texto plano y su respectivo texto cifrado.
+
+En el modo OFB este ataque permite la lectura íntegra de los mensajes trasmitidos en el caso de que se cifren varios de ellos reutilizando clave y vector inicializador, gracias a las propiedades de la operación XOR.
+
+Es aplicable debido a la generación de bloques pseudoaleatorios que se puede ver en su esquema. Todos estos bloques dependen únicamente del vector inicializador y de la clave utilizada en el cifrado.
+
+Consideramos $E_K(E_K...(IV))$ el bloque intermedio $I_i$:
+
+$$C_i = I_i \oplus P_i$$
+
+$$I_i = C_i \oplus P_i$$
+
+En base a los bloques de texto cifrado y los bloques de texto claro se recuperan todos los bloques intermedios. Estos bloques intermedios se pueden operar XOR con otros textos cifrados con la misma clave y vector inicializador recuperando así el mensaje original:
+
+$$P^\prime_i = I_i \oplus C^\prime_i$$
+
+> [Ver implementación del ataque de texto claro conocido al modo OFB.](scripts/ofb_known_plaintext_attack.py)
 
 
 ### CTR (Counter)
