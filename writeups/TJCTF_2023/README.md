@@ -189,11 +189,11 @@ assert pow(max_hsh, 7) < n and pow(max_hsh, 8) > n
 
 El ataque de difusión Hastad se basa en el escenario en que si un emisor envía el mismo mensaje a $k$ personas usando una clave pública pequeña $e$ y diferentes módulos $n$, se necesitan $e$ número de mensajes cifrados para comprometer la seguridad. Por ejemplo, para $e = 3$ Eva intercepta $c_1$, $c_2$ y $c_3$, donde cada $c$ es $c_i \equiv m^3 \bmod n_i$.
 
-$$ c_1 \equiv m^3 \bmod n_1 \rightarrow m^3 \equiv c_1 \bmod n_1$$
+$$c_1 \equiv m^3 \bmod n_1 \rightarrow m^3 \equiv c_1 \bmod n_1$$
 
-$$ c_2 \equiv m^3 \bmod n_2 \rightarrow m^3 \equiv c_2 \bmod n_2$$
+$$c_2 \equiv m^3 \bmod n_2 \rightarrow m^3 \equiv c_2 \bmod n_2$$
 
-$$ c_3 \equiv m^3 \bmod n_3 \rightarrow m^3 \equiv c_3 \bmod n_3$$
+$$c_3 \equiv m^3 \bmod n_3 \rightarrow m^3 \equiv c_3 \bmod n_3$$
 
 Aplicando el [teorema del resto chino](https://en.wikipedia.org/wiki/Chinese_remainder_theorem) podemos encontrar $m^3$, siendo su raíz cúbica el hash buscado.
 
@@ -314,11 +314,11 @@ En esta situación, se puede manipular las peticiones para hacer un ataque del m
 4. Se obtiene la firma de $m_2$ con el ```new```: $s_2$.
 5. Se calcula $s$ como:
 
-$$ s_1 \equiv m_1^d \bmod n$$
+$$s_1 \equiv m_1^d \bmod n$$
 
-$$ s_2 \equiv m^d \cdot m_1^{-d} \bmod n$$
+$$s_2 \equiv m^d \cdot m_1^{-d} \bmod n$$
 
-$$ s \equiv s_1 \cdot s_2 \bmod n \equiv m_1^d \cdot m^d \cdot m_1^{-d} \bmod n \equiv m^d \bmod n$$
+$$s \equiv s_1 \cdot s_2 \bmod n \equiv m_1^d \cdot m^d \cdot m_1^{-d} \bmod n \equiv m^d \bmod n$$
 
 Se utiliza el valor de $s$ para iniciarse sesión como el administrador.
 
@@ -413,15 +413,15 @@ El método de Coppersmith es un algoritmo utilizado para resolver ecuaciones mod
 
 Se sabe que:
 
-$$ c \equiv m^e \bmod n \rightarrow m^e - c \equiv 0 \bmod n$$
+$$c \equiv m^e \bmod n \rightarrow m^e - c \equiv 0 \bmod n$$
 
-$$ f(x) = m^e - c$$
+$$f(x) = m^e - c$$
 
 El algoritmo de Coppersmith permite encontrar una solución entera $x_0$ para algún entero $x_0 < n^{1 / e}$.
 
 En los casos en los que se conoce una parte del mensaje, se puede transformar el polinomio como:
 
-$$ f(x) = (M + x)^e - c$$
+$$f(x) = (M + x)^e - c$$
 
 Siendo $M$ el mensaje conocido y $x$ la flag.
 
@@ -437,9 +437,9 @@ En nuestro ejemplo:
 M = bytes_to_long(b'the challenges flag is ')
 ```
 
-$$ M = 11149651487439933873850349163109051510832664011661210400$$
+$$M = 11149651487439933873850349163109051510832664011661210400$$
 
-$$ c = ((2^8)^{len} \cdot M + x)^e - c$$
+$$c = ((2^8)^{len} \cdot M + x)^e - c$$
 
 La longitud de la flag $len$ representa ese desplazamiento del mensaje conocido hacia la izquierda. No la conocemos, por lo que habrá que hacer un ataque de fuerza bruta. 
 
