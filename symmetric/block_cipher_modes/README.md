@@ -58,7 +58,7 @@ Para comprender los modos de operación de cifrados de bloques, se recomienda te
     3. [CTR (Counter)](#ctr-counter)
         1. [Esquema](#esquema-5)
         2. [Ecuaciones](#ecuaciones-5)
-        3. [Criptoanális](#criptoanc3a1lisis-5)
+        3. [Criptoanálisis](#criptoanálisis-5)
             1. [Nonce reutilizado](#nonce-reutilizado)
             2. [Bit-flipping attack](#bit-flipping-attack-1)
 
