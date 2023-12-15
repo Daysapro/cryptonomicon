@@ -1,7 +1,5 @@
 # Modos de operación de cifrado de bloques
 
-[![development_tag](https://img.shields.io/badge/en%20desarrollo-75%25-brightgreen)]()
-
 [![follow_tag](https://img.shields.io/github/followers/Daysapro?label=Seguir&style=social)](https://github.com/Daysapro) [![like_tag](https://img.shields.io/github/stars/Daysapro/cryptonomicon?label=Favorito&style=social)](https://github.com/Daysapro/cryptonomicon)
 
 [![symmetric_tag](https://img.shields.io/:simétrico-2ecc71.svg?labelColor=3A0EB5&color=3A0EB5)]() [![xor_tag](https://img.shields.io/:XOR-2ecc71.svg?labelColor=3A0EB5&color=3A0EB5)]()
@@ -60,6 +58,9 @@ Para comprender los modos de operación de cifrados de bloques, se recomienda te
     3. [CTR (Counter)](#ctr-counter)
         1. [Esquema](#esquema-5)
         2. [Ecuaciones](#ecuaciones-5)
+        3. [Criptoanális](#criptoanc3a1lisis-5)
+            1. [Nonce reutilizado](#nonce-reutilizado)
+            2. [Bit-flipping attack](#bit-flipping-attack-1)
 
 
 ## Introducción
@@ -263,7 +264,7 @@ Este último byte de los bloques puede ser el más problemático, ya que pueden 
 
 5. Estos pasos se pueden repetir para cualquier bloque de texto cifrado, y una vez obtenidos todos los bloques intermedios, solo es necesario realizar la operación XOR con el vector inicializador y los bloques cifrados iniciales.
 
-> [Ver implementación del ataque padding oracle al modo CBC.](scripts/ecb_byte_at_a_time.py)
+> [Ver implementación del ataque padding oracle al modo CBC.](scripts/cbc_padding_oracle_attack.py)
 
 
 ##### Bit-flipping attack
@@ -300,7 +301,7 @@ El bloque cifrado nuevo debe ser: ```\xd2#1\x8c\xceA<\xddz\x9d\x0c\x03\xc5\xc2\x
 
 Este ataque implica la manipulación del bloque cifrado anterior, que tras pasar por el descifrado perderá por completo el sentido. En situaciones en las que ese bloque se interprete posteriormente el programa intérprete podría detectar el ataque y mitigarlo.
 
-> [Ver implementación del ataque bit-flipping al modo CBC.](scripts/ecb_byte_at_a_time.py)
+> [Ver implementación del ataque bit-flipping al modo CBC.](scripts/cbc_bit_flipping_attack.py)
 
 
 ##### IV = key
@@ -439,7 +440,7 @@ $$P_i = E_K(C_{i - 1}) \oplus C_i$$
 
 $$I_0 = IV$$
 
-$$I_i = ((I_{i - 1} << s) + C_i) \bmod 2^b$$
+$$I_i = ((I_{i - 1} << s) | C_i) \bmod 2^b$$
 
 $$C_i = MSB_s(E_K(I_{i - 1})) \oplus P_i$$
 
@@ -468,7 +469,7 @@ La probabilidad de que el primer byte de $E_K(IV)$ fuera 0, byte que corresponde
 
 $$C_0 = 0 \oplus P_0 = 0 \oplus 0 = 0$$
 
-3. El nuevo bloque a pasar por el módulo cifrador se forma como $IV << 8 + C_0$. El $IV$ desplazado 8 bits a la derecha es todo ceros y $C_0$ también. Tras el cifrado se volverá a obtener en el primer byte un 0, por lo que $C_1$ tendrá el mismo destino que $C_0$.
+3. El nuevo bloque a pasar por el módulo cifrador se forma como $IV << 8 | C_0$. El $IV$ desplazado 8 bits a la derecha es todo ceros y $C_0$ también. Tras el cifrado se volverá a obtener en el primer byte un 0, por lo que $C_1$ tendrá el mismo destino que $C_0$.
 
 4. Y así, iterando sobre el $IV$ y los nuevos bytes cifrados, se formará un mensaje cifrado entero de ceros.
 
@@ -541,7 +542,7 @@ $$P^\prime_i = I_i \oplus C^\prime_i$$
 
 ### CTR (Counter)
 
-El modo CTR es el modo más aceptado y usado en la actualidad. Se parte desde un $IV$ el cual es concatenado, sumado u operado con XOR con un contador. Este contador va aumentando en una unidad por cada bloque y es el bloque resultado de la encriptación $IV$ y contador el que se opera por XOR con el texto en claro.
+El modo CTR es el modo más aceptado y usado en la actualidad. Se parte desde un $IV$ el cual es concatenado, sumado u operado con XOR con un contador. Este contador va aumentando en una unidad por cada bloque y es el bloque resultado de la encriptación $IV$ y contador el que se opera por XOR con el texto en claro. Pese a que el contador de incremento de uno en uno es el más usado no es el único existente. Cualquier función capaz de producir una secuencia sin repeticiones en intervalos de tiempo lo suficientemente amplios podría ser un contador válido.
 
 La forma en la que se une el vector inicializador con el contador depende de la seguridad de la generación del vector y del servicio al que se disponga el sistema criptográfico.
 
@@ -561,6 +562,74 @@ El vector inicializador $IV$ en estos casos se suele denominar [nonce](https://e
 
 #### Ecuaciones
 
-$$C_i = E_K(IV + i) \oplus P_0$$
+Con un contador de incremento de uno:
 
-$$P_i = E_K(IV + i) \oplus C_0$$
+$$C_i = E_K(IV | i) \oplus P_i$$
+
+$$P_i = E_K(IV | i) \oplus C_i$$
+
+
+#### Criptoanálisis
+
+##### Nonce reutilizado
+
+En una exfiltración de datos se obtienen una serie de textos cifrados junto con la información de que han sido cifrados con la misma clave y con el mismo nonce. El contador también se ha iniciado en el mismo valor para todos los casos.
+
+Aunque no se conoce ningún texto en claro sabemos que:
+
+$$C_i = I_i \oplus P_i$$
+ 
+$$I_i = C_i \oplus P_i$$
+
+Teniendo los bloques $C_i$ se pueden obtener algunas conclusiones. Si los textos originales sabemos que están en inglés, sería altamente probable que alguno de todos ellos contuviera la palabra ```the```. Se puede hacer la operación XOR con cada consecución de 3 bytes de los textos cifrados y cada resultado es un fragmento candidato de los bloques intermedios. El fragmento candidato se confirmará haciendo XOR respecto al resto de textos cifrados. Si los resultados son legibles en inglés, se confirma la hipótesis.
+
+Este método basado en sustituciones tiene dificultades a la hora de ser automatizado ya que requiere de una persona capaz de valorar si un texto es legible en inglés o no.
+
+Otra alternativa mejor es considerar el caso como un único texto que utiliza una clave cíclica XOR.
+
+1. Se toma el texto cifrado de menor longitud.
+2. Se ajustan los textos de mayor longitud a la longitud del menor.
+3. Se sabe que todos esos fragmentos de textos cifrados han sido operados según la operación XOR con la misma clave. 
+4. Se construyen conjuntos de los bytes $i$ de cada fragmento de texto cifrado. Se sabe que estos conjuntos han sido operados con XOR con el mismo byte. Se realiza un ataque de fuerza bruta con todos los bytes y se selecciona el resultado más creíble de cada conjunto, teniendo en cuenta la información de que el mensaje está en inglés y descartando bytes no imprimibles u otros resultados sin sentido. Este paso supone la mayor complicación del ejercicio y requiere de un evaluador de textos, el cuál podría ser un análisis de frecuencias.
+5. Concatenando los bytes que obtienen los mejores resultados se obtiene la clave.
+
+> [Ver implementación de un ataque estadístico a un nonce reutilizado en el modo CTR.](scripts/ctr_fixed_nonce.py)
+
+
+##### Bit-flipping attack
+
+El ataque bit-flipping en los modos OFB o CTR es mucho más fácil que en el modo CBC. El cambio de un byte en el texto claro o cifrado solo provoca cambios en el texto cifrado o claro respectivo. Por tanto, para cambiar un byte del texto claro solo hay que saber su posición y qué valor a introducir va a causar el efecto deseado.
+
+Se recupera el ejemplo utilizado en el bit-flipping del modo CBC. 
+
+Un servidor web tramita peticiones de inicio de sesión según los siguientes parámetros:
+
+```user=user&password=password&admin=0```
+
+Los campos ```user``` y ```password``` son introducidos por el cliente mientras que el campo ```admin``` se envía por defecto en 0. Como la empresa no quiere que cualquier cliente pueda introducir el valor ```admin``` 1 y entrar al panel de control, envía la petición cifrada utilizando el sistema de cifrado AES en modo CTR, petición que pasa por el cliente.
+
+1. Mismo primer paso que en el modo CBC. Se calcula la posición del carácter que se quiere modificar. En el caso de ```user=user&password=password&admin=0``` el primer bloque sería ```user=user&passwo```, el segundo ```rd=password&admi``` y el tercero ```n=0\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13\x13```. El byte que queremos modificar es el tercero del tercer bloque.
+
+2. Según las ecuaciones del modo CTR:
+
+$$P_i = I_i \oplus C_i$$
+
+$$I_i = C_i \oplus P_i$$
+
+Nuestro byte de interés en el mensaje en claro es 0. Por tanto, se puede calcular el byte del bloque intermedio. Con esta información, se puede forzar que el byte del bloque anterior operado por XOR con el byte intermedio sea 1. Se cambia ese byte y ```admin``` vale 1.
+
+Por ejemplo, si nuestro tercer bloque cifrado fuera ```\xd2#\xcb\x8c\xceA<\xddz\x9d\x0c\x03\xc5\xc2\xc2\x8c```:
+
+$$I_2 = ord(/xcb) \oplus ord(0) = 61 \oplus 48 = 13$$
+
+Siendo ```ord``` la operación de convertir un byte a su representación entera. Nótese que en este caso los índices marcan las posiciones de los bytes dentro de los bloques.
+
+Se busca que $P^\prime_2$ sea 1, por lo que:
+
+$$C^\prime_2 = I_2 \oplus P^\prime_2 = 13 \oplus ord(1) = 13 \oplus 60 = 49$$
+
+El bloque cifrado nuevo debe ser: ```\xd2#1\x8c\xceA<\xddz\x9d\x0c\x03\xc5\xc2\xc2\x8c```, siendo ```1``` la conversión en bytes del número 49.
+
+Además, a diferencia que en el modo CBC, el resto de bloques no se ven afectados por este cambio.
+
+> [Ver implementación del ataque bit-flipping al modo CTR.](scripts/ctr_bit_flipping_attack.py)
