@@ -35,9 +35,9 @@ Para poder entender este tema se recomienda al lector tener conocimientos básic
         1. [Manipulación del parámetro g](#manipulación-del-parámetro-g)
         2. [Manipulación de los parámetros A y B](#manipulación-de-los-parámetros-a-y-b)
         3. [Manipulación del parámetro p](#manipulación-del-primo-p)
-    3. [Sucesores](#sucesores)
-        1. [ElGamal](#elgamal)
-        2. [Curvas elípticas](#curvas-elípticas)
+5. [Sucesores](#sucesores)
+    1. [ElGamal](#elgamal)
+    2. [Curvas elípticas](#curvas-elípticas)
 
 
 ## Introducción
