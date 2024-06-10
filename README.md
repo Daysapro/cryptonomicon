@@ -5,7 +5,7 @@
 
 > Criptografía en español.
 
-`Crytonomicon` es una iniciativa en español que tiene como objetivo brindar conocimientos teóricos y prácticos sobre criptografía. El enfoque es proporcionar una comprensión clara y concisa de los principios teóricos, lo que sentará las bases necesarias para cualquier perfil técnico de ciberseguridad. Todo el aprendizaje gira alrededor de la metodología basada en retos para presentar ejemplos y poner en práctica lo aprendido.
+`Cryptonomicon` es una iniciativa en español que tiene como objetivo brindar conocimientos teóricos y prácticos sobre criptografía. El enfoque es proporcionar una comprensión clara y concisa de los principios teóricos, lo que sentará las bases necesarias para cualquier perfil técnico de ciberseguridad. Todo el aprendizaje gira alrededor de la metodología basada en retos para presentar ejemplos y poner en práctica lo aprendido.
 
 Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de experiencia. Si bien algunos temas pueden requerir ciertos conocimientos previos, no son imprescindibles para el entendimiento.
 
@@ -19,6 +19,7 @@ Cualquier persona interesada puede comenzar a aprender, sin importar su nivel de
         - [Diffie-Hellman](/asymmetric/diffie-hellman/README.md)
         - [RSA](/asymmetric/rsa/README.md)
 - **Soluciones de competiciones CTF**
+    - [AKASEC CTF 2024](/writeups/Akasec_CTF_2024/README.md)
     - [GlacierCTF 2023](/writeups/GlacierCTF_2023/README.md)
     - [SECCON CTF 2023 Quals](/writeups/SECCON_CTF_2023_Quals/README.md)
     - [CTFZone 2023 Quals](/writeups/CTFZone_2023_Quals/README.md)

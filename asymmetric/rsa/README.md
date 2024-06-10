@@ -171,6 +171,7 @@ $d \cdot \phi(n)$ es un valor muy pequeño que tiende a 0, por lo que:
 $$\frac{e}{\phi(n)} \approx \frac{k}{d}$$
 
 En base a estas ideas, Wiener formuló el siguiente teorema:
+
 Siendo $n = p \cdot q$ con $q < p < 2p$ y $d < \frac{1}{3}n^{\frac{1}{4}}$, dada una clave pública $(e, n)$ un ataque puede recuperar eligiendo el correcto $\frac{k}{d}$ entre los valores [convergentes](https://en.wikipedia.org/wiki/Continued_fraction) de $\frac{e}{n}$.
 
 Con estas condiciones, Wiener probaba que $\phi(n) \approx n$.
@@ -180,7 +181,7 @@ Con estas condiciones, Wiener probaba que $\phi(n) \approx n$.
 
 El concepto de fracción continua surge a raíz de la necesidad de expresar cualquier número racional de una forma matemáticamente elegante.
 
-Cualquier número racional se puede expresar según la siguiente fórmula:
+Cualquier número se puede expresar según la siguiente fórmula:
 
 $$x = a_0 + \frac{1}{a_1 + \frac{1}{a_2 + \frac{1}{a_3 + \frac{1}{...}}}}$$
 
