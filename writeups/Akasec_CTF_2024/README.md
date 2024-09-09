@@ -11,7 +11,7 @@ Todo el código desarrollado se puede consultar en la carpeta de scripts.
 
 ## GCL
 
-> **45/699 soluciones | 191 puntos**
+> **45/696 soluciones | 191 puntos**
 
 **Enunciado**
 
